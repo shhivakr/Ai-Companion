@@ -4,6 +4,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 
 import routes from "./routes/index.js";
+import { env } from "./config/env.js";
 import {
   errorHandler,
   notFoundHandler,
@@ -15,7 +16,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: env.CLIENT_URL,
     credentials: true,
   }),
 );

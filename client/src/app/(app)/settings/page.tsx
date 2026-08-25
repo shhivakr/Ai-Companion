@@ -1,19 +1,46 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
 import SettingsSection from "@/components/settings/SettingsSection";
 import SettingsRow from "@/components/settings/SettingsRow";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
   const [companionInsights, setCompanionInsights] = useState(true);
-
   const [memoryEnabled, setMemoryEnabled] = useState(true);
-
   const [notifications, setNotifications] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    try {
+      setLoggingOut(true);
+
+      await logout();
+
+      toast.success("You have been signed out.");
+
+      router.replace("/login");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to sign out.";
+
+      toast.error(message);
+    } finally {
+      setLoggingOut(false);
+    }
+  }
+
+  const userName = user?.name || "User";
+  const userEmail = user?.email || "";
 
   return (
     <div className="space-y-8 py-6">
@@ -27,7 +54,7 @@ export default function SettingsPage() {
         </h1>
 
         <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-          Manage your account and how Companion works for you.
+          Manage your account and how SIVRA works for you.
         </p>
       </section>
 
@@ -42,12 +69,12 @@ export default function SettingsPage() {
           description="Your name and profile information."
         >
           <div className="flex items-center gap-3">
-            <Avatar name="Shiva Kumar" size="md" />
+            <Avatar name={userName} size="md" />
 
             <div>
-              <p className="text-sm font-medium">Shiva Kumar</p>
+              <p className="text-sm font-medium">{userName}</p>
 
-              <p className="text-xs text-neutral-500">shiva@example.com</p>
+              <p className="text-xs text-neutral-500">{userEmail}</p>
             </div>
           </div>
         </SettingsRow>
@@ -64,11 +91,11 @@ export default function SettingsPage() {
 
       <SettingsSection
         title="Companion"
-        description="Control how Companion interacts with you."
+        description="Control how SIVRA interacts with you."
       >
         <SettingsRow
           title="Companion insights"
-          description="Allow Companion to surface patterns and useful observations."
+          description="Allow SIVRA to surface patterns and useful observations."
         >
           <button
             type="button"
@@ -90,7 +117,7 @@ export default function SettingsPage() {
 
         <SettingsRow
           title="Default interaction style"
-          description="Choose how Companion should generally respond."
+          description="Choose how SIVRA should generally respond."
         >
           <select
             defaultValue="balanced"
@@ -107,11 +134,11 @@ export default function SettingsPage() {
 
       <SettingsSection
         title="Memory"
-        description="Control what Companion can remember."
+        description="Control what SIVRA can remember."
       >
         <SettingsRow
           title="Memory"
-          description="Allow Companion to retain useful context across conversations."
+          description="Allow SIVRA to retain useful context across conversations."
         >
           <button
             type="button"
@@ -147,7 +174,7 @@ export default function SettingsPage() {
       >
         <SettingsRow
           title="Notifications"
-          description="Receive reminders and useful Companion updates."
+          description="Receive reminders and useful SIVRA updates."
         >
           <button
             type="button"
@@ -200,7 +227,13 @@ export default function SettingsPage() {
 
       <SettingsSection title="Account" description="Manage your account.">
         <SettingsRow title="Sign out" description="Sign out from this device.">
-          <Button variant="secondary">Sign out</Button>
+          <Button
+            variant="secondary"
+            onClick={handleLogout}
+            disabled={loggingOut}
+          >
+            {loggingOut ? "Signing out..." : "Sign out"}
+          </Button>
         </SettingsRow>
 
         <SettingsRow

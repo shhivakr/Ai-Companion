@@ -9,8 +9,7 @@ import {
 import { AuthenticatedRequest } from "../../../middleware/auth.middleware.js";
 import { refreshTokenCookieOptions } from "../../../config/cookies.js";
 import { AppError } from "../../../utils/AppError.js";
-import { hashToken } from "../../../utils/token.js";
-import { RefreshToken } from "../models/RefreshToken.js";
+import { User } from "../../users/models/User.js";
 
 export const register: RequestHandler = async (req, res, next) => {
   try {
@@ -55,10 +54,25 @@ export const getMe: RequestHandler = async (req, res, next) => {
   try {
     const userId = (req as AuthenticatedRequest).userId;
 
+    const user = await User.findById(userId).select(
+      "name email avatar isEmailVerified",
+    );
+
+    if (!user) {
+      throw new AppError("User not found", 401);
+    }
+
     res.status(200).json({
       success: true,
       data: {
         userId,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          isEmailVerified: user.isEmailVerified,
+        },
       },
     });
   } catch (error) {

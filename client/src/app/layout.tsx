@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
+
+import AuthProvider from "@/providers/AuthProvider";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Companion",
-  description: "Personal AI Productivity Companion",
+  title: "SIVRA",
+  description: "Your personal AI companion",
 };
 
 export default function RootLayout({
@@ -13,7 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          {children}
+
+          <Toaster position="bottom-right" richColors={false} />
+        </AuthProvider>
+      </body>
     </html>
   );
 }

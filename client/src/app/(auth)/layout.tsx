@@ -1,3 +1,4 @@
+// client/src/app/%28auth%29/layout.tsx
 export default function AuthLayout({
   children,
 }: Readonly<{
