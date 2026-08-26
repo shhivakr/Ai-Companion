@@ -3,6 +3,7 @@
 import { useDeleteGoal } from "@/hooks/useGoals";
 
 import Button from "@/components/ui/Button";
+import { toast } from "sonner";
 
 interface GoalDeleteDialogProps {
   goalId: string;
@@ -28,9 +29,13 @@ export default function GoalDeleteDialog({
       await deleteGoalMutation.mutateAsync(goalId);
 
       onSuccess?.();
-    } catch {
-      // Mutation error is displayed below.
-    }
+    } catch (error) {
+  toast.error(
+    error instanceof Error
+      ? error.message
+      : "Unable to delete goal.",
+  );
+}
   }
 
   return (

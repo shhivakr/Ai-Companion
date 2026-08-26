@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { toast } from "sonner";
 import Button from "@/components/ui/Button";
 import { useCreateGoal } from "@/hooks/useGoals";
 import {
@@ -43,22 +43,19 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
     try {
       await createGoalMutation.mutateAsync({
         title: values.title.trim(),
-
         description: values.description?.trim() || undefined,
-
         category: values.category?.trim() || undefined,
-
         milestone: values.milestone?.trim() || undefined,
-
         nextAction: values.nextAction?.trim() || undefined,
-
         targetDate: values.targetDate || undefined,
       });
 
       reset();
       onSuccess?.();
-    } catch {
-      // Mutation error is displayed below.
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unable to create goal.",
+      );
     }
   }
 
