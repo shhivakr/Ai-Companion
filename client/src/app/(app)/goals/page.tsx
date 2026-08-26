@@ -1,41 +1,21 @@
-import GoalCard from "@/components/goals/GoalCard";
-import Button from "@/components/ui/Button";
+"use client";
 
-const goals = [
-  {
-    title: "Build my product",
-    description: "Turn the Personal AI Companion idea into a usable product.",
-    progress: 62,
-    milestone: "Complete core UI",
-    nextAction: "Finish onboarding experience",
-    category: "Business",
-  },
-  {
-    title: "Grow my development career",
-    description:
-      "Build stronger full-stack development skills and create better projects.",
-    progress: 38,
-    milestone: "Complete portfolio projects",
-    nextAction: "Finish current project",
-    category: "Career",
-  },
-  {
-    title: "Build a consistent learning routine",
-    description: "Create a sustainable daily learning habit.",
-    progress: 45,
-    milestone: "Maintain weekly consistency",
-    nextAction: "Complete today's learning session",
-    category: "Learning",
-  },
-];
+import GoalCard from "@/components/goals/GoalCard";
+import GoalForm from "@/components/goals/GoalForm";
+import GoalModal from "@/components/goals/GoalModal";
+import Button from "@/components/ui/Button";
+import { useGoals } from "@/hooks/useGoals";
+import { useState } from "react";
 
 export default function GoalsPage() {
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  /*================================ Hooks ================================*/
+  const { data: goals = [], isLoading, isError, error } = useGoals();
   return (
     <div className="space-y-8 py-6">
-      {/* Header */}
-
-      <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div>
+      {/*========================== Header =================================*/}
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <section>
           <p className="text-sm text-neutral-500">Direction</p>
 
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -43,14 +23,40 @@ export default function GoalsPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-            The things you're working toward.
+            What you are moving toward, and what matters next.
           </p>
-        </div>
+        </section>
 
-        <Button>Add goal</Button>
+        <Button type="button" onClick={() => setIsCreateOpen(true)}>
+          Add goal
+        </Button>
+      </div>
+      <section className="grid gap-5 lg:grid-cols-2">
+        {isLoading ? (
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6">
+            <p className="text-sm text-neutral-500">Loading your goals...</p>
+          </div>
+        ) : isError ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+            <p className="text-sm text-red-600">
+              {error instanceof Error ? error.message : "Unable to load goals."}
+            </p>
+          </div>
+        ) : goals.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 lg:col-span-2">
+            <p className="text-sm font-medium">No goals yet.</p>
+
+            <p className="mt-1 text-sm text-neutral-500">
+              Create your first goal to give Companion something meaningful to
+              work with.
+            </p>
+          </div>
+        ) : (
+          goals.map((goal) => <GoalCard key={goal._id} {...goal} />)
+        )}
       </section>
 
-      {/* Filters */}
+      {/* ================================ Filters ================================= */}
 
       <div className="flex items-center gap-1 border-b border-neutral-200">
         {["Active", "Completed", "Paused"].map((filter, index) => (
@@ -69,15 +75,15 @@ export default function GoalsPage() {
         ))}
       </div>
 
-      {/* Goals */}
+      {/* ===================================== Goals ===================================== */}
 
       <section className="grid gap-5 lg:grid-cols-2">
         {goals.map((goal) => (
-          <GoalCard key={goal.title} {...goal} />
+          <GoalCard key={goal._id} {...goal} />
         ))}
       </section>
 
-      {/* Companion Context */}
+      {/* ===================================== Companion Context ===================================== */}
 
       <section className="rounded-2xl border border-neutral-200 bg-neutral-100 p-6">
         <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
@@ -100,6 +106,16 @@ export default function GoalsPage() {
           Discuss my goals
         </Button>
       </section>
+      <GoalModal open={isCreateOpen} onClose={() => setIsCreateOpen(false)}>
+        <GoalForm
+          onSuccess={() => {
+            setIsCreateOpen(false);
+          }}
+          onCancel={() => {
+            setIsCreateOpen(false);
+          }}
+        />
+      </GoalModal>
     </div>
   );
 }
