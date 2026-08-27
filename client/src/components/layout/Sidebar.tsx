@@ -17,9 +17,8 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden h-screen w-64 shrink-0 border-r border-neutral-200 bg-white lg:flex lg:flex-col">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-neutral-200 bg-white lg:flex lg:flex-col">
       {/* Brand */}
-
       <div className="flex h-20 items-center px-5">
         <Link href="/" className="flex items-center gap-3">
           <img
@@ -39,9 +38,7 @@ export default function Sidebar() {
           </div>
         </Link>
       </div>
-
       {/* Navigation */}
-
       <nav className="flex-1 px-3 py-4">
         <div className="space-y-1">
           {navigation.map((item) => {
@@ -66,9 +63,7 @@ export default function Sidebar() {
           })}
         </div>
       </nav>
-
       {/* Settings */}
-
       <div className="border-t border-neutral-200 p-3">
         <Link
           href="/settings"

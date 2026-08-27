@@ -2,7 +2,11 @@ import type { Request, Response } from "express";
 
 import type { AuthenticatedRequest } from "../../../middleware/auth.middleware.js";
 
-import { chatWithCompanion, getConversationHistory } from "../services/companion.service";
+import {
+  chatWithCompanion,
+  getConversationHistory,
+  getConversations,
+} from "../services/companion.service";
 import { chatSchema } from "../validation/companion.validation";
 import mongoose from "mongoose";
 
@@ -29,8 +33,11 @@ export async function chatCompanionController(req: Request, res: Response) {
   try {
     const userId = getUserId(req);
 
-    const response = await chatWithCompanion(userId, result.data.message);
-
+    const response = await chatWithCompanion(
+      userId,
+      result.data.message,
+      result.data.conversationId,
+    );
     return res.status(200).json({
       message: "Companion response generated successfully",
       data: response,
@@ -43,7 +50,6 @@ export async function chatCompanionController(req: Request, res: Response) {
     });
   }
 }
-
 
 export async function getConversationController(
   req: Request<{ conversationId: string }>,
@@ -60,10 +66,7 @@ export async function getConversationController(
   try {
     const userId = getUserId(req);
 
-    const conversation = await getConversationHistory(
-      userId,
-      conversationId,
-    );
+    const conversation = await getConversationHistory(userId, conversationId);
 
     if (!conversation) {
       return res.status(404).json({
@@ -79,6 +82,24 @@ export async function getConversationController(
 
     return res.status(500).json({
       message: "Failed to fetch conversation",
+    });
+  }
+}
+
+export async function getConversationsController(req: Request, res: Response) {
+  try {
+    const userId = getUserId(req);
+
+    const conversations = await getConversations(userId);
+
+    return res.status(200).json({
+      conversations,
+    });
+  } catch (error) {
+    console.error("Get conversations error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch conversations",
     });
   }
 }

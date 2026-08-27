@@ -8,10 +8,10 @@ interface AppShellProps {
 export default function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-950">
-      <div className="flex min-h-screen">
+      <div className="min-h-screen">
         <Sidebar />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col lg:ml-64">
           <Topbar />
 
           <main className="min-w-0 flex-1">

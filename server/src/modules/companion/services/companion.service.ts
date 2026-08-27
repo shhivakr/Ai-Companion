@@ -129,3 +129,20 @@ export async function getConversationHistory(
     })),
   };
 }
+
+export async function getConversations(userId: string, limit = 20) {
+  const conversations = await Conversation.find({
+    user: userId,
+  })
+    .sort({ updatedAt: -1 })
+    .limit(limit)
+    .select("_id title createdAt updatedAt")
+    .lean();
+
+  return conversations.map((conversation) => ({
+    conversationId: conversation._id.toString(),
+    title: conversation.title,
+    createdAt: conversation.createdAt,
+    updatedAt: conversation.updatedAt,
+  }));
+}

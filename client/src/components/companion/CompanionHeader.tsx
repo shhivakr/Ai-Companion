@@ -1,6 +1,16 @@
+"use client";
+
 import Avatar from "@/components/ui/Avatar";
 
-export default function CompanionHeader() {
+interface CompanionHeaderProps {
+  onNewConversation?: () => void;
+  disabled?: boolean;
+}
+
+export default function CompanionHeader({
+  onNewConversation,
+  disabled = false,
+}: CompanionHeaderProps) {
   return (
     <div className="flex items-center justify-between border-b border-neutral-200 pb-5">
       <div className="flex items-center gap-3">
@@ -15,12 +25,23 @@ export default function CompanionHeader() {
         </div>
       </div>
 
-      <button
-        type="button"
-        className="rounded-lg border border-neutral-200 px-3 py-2 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
-      >
-        Context
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onNewConversation}
+          disabled={disabled}
+          className="rounded-lg border border-neutral-200 px-3 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          New conversation
+        </button>
+
+        <button
+          type="button"
+          className="rounded-lg border border-neutral-200 px-3 py-2 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+        >
+          Context
+        </button>
+      </div>
     </div>
   );
 }
