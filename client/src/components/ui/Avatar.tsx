@@ -34,7 +34,7 @@ export default function Avatar({
 
   return (
     <div
-      className={`flex items-center justify-center rounded-full bg-neutral-900 font-medium text-white ${sizes[size]}`}
+      className={`flex items-center justify-center rounded-full bg-neutral-950 font-medium text-white dark:bg-neutral-100 dark:text-neutral-950 ${sizes[size]}`}
       aria-label={name}
     >
       {initials}

@@ -35,7 +35,7 @@ export default function GoogleButton({ onClick }: GoogleButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-800 transition hover:bg-neutral-50 focus:outline-none focus:ring-4 focus:ring-neutral-100"
+      className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-800 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neutral-100 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800 dark:focus-visible:ring-neutral-900/40"
     >
       <GoogleIcon />
 

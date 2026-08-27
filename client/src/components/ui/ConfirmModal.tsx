@@ -34,10 +34,12 @@ export default function ConfirmModal({
         }
       }}
     >
-      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-neutral-950">{title}</h2>
+      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-950 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
+        <h2 className="text-lg font-semibold">{title}</h2>
 
-        <p className="mt-2 text-sm leading-6 text-neutral-500">{description}</p>
+        <p className="mt-2 text-sm leading-6 text-neutral-500 dark:text-neutral-400">
+          {description}
+        </p>
 
         <div className="mt-6 flex justify-end gap-3">
           <Button
@@ -49,7 +51,12 @@ export default function ConfirmModal({
             Cancel
           </Button>
 
-          <Button type="button" onClick={onConfirm} disabled={loading}>
+          <Button
+            type="button"
+            onClick={onConfirm}
+            disabled={loading}
+            className="bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-50 dark:text-neutral-950 dark:hover:bg-white"
+          >
             {loading ? "Deleting..." : confirmLabel}
           </Button>
         </div>

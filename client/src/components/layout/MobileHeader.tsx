@@ -8,7 +8,7 @@ interface MobileHeaderProps {
 
 export default function MobileHeader({ onMenuClick }: MobileHeaderProps) {
   return (
-    <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 lg:hidden">
+    <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 text-neutral-950 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 lg:hidden">
       <Link href="/" className="flex items-center gap-2.5">
         <img
           src="/brand/sivra.logo.png"
@@ -23,7 +23,7 @@ export default function MobileHeader({ onMenuClick }: MobileHeaderProps) {
         type="button"
         onClick={onMenuClick}
         aria-label="Open navigation"
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-600 hover:bg-neutral-100"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-900"
       >
         <svg
           width="20"
