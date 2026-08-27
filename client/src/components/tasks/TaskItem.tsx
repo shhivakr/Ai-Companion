@@ -46,23 +46,34 @@ export default function TaskItem({
   const due = formatDueDate(task.dueDate);
 
   return (
-    <div className="group flex items-start gap-4 py-4">
+    <article
+      className={[
+        "group flex items-start gap-3 py-4 sm:gap-4",
+        completed ? "opacity-80" : "",
+      ].join(" ")}
+    >
       {/* Complete */}
 
       <button
         type="button"
         aria-label={
-          completed ? `Mark ${task.title} as pending` : `Complete ${task.title}`
+          completed
+            ? `Mark "${task.title}" as pending`
+            : `Mark "${task.title}" as completed`
         }
+        aria-pressed={completed}
         onClick={() => onToggle?.(task)}
         className={[
-          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border outline-none transition",
+          "focus-visible:ring-2 focus-visible:ring-neutral-300 focus-visible:ring-offset-2",
           completed
             ? "border-neutral-950 bg-neutral-950"
             : "border-neutral-300 hover:border-neutral-900",
         ].join(" ")}
       >
-        {completed && <span className="h-2 w-2 rounded-full bg-white" />}
+        {completed && (
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-white" />
+        )}
       </button>
 
       {/* Content */}
@@ -70,49 +81,83 @@ export default function TaskItem({
       <div className="min-w-0 flex-1">
         <p
           className={[
-            "text-sm font-medium",
+            "break-words text-sm font-medium",
             completed ? "text-neutral-400 line-through" : "text-neutral-950",
           ].join(" ")}
         >
           {task.title}
         </p>
 
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          {goalTitle && (
-            <span className="text-xs text-neutral-500">{goalTitle}</span>
-          )}
+        {task.description && (
+          <p
+            className={[
+              "mt-1 line-clamp-2 text-xs leading-5",
+              completed ? "text-neutral-400" : "text-neutral-500",
+            ].join(" ")}
+          >
+            {task.description}
+          </p>
+        )}
 
-          {goalTitle && due && <span className="text-neutral-300">·</span>}
+        {(goalTitle || due) && (
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            {goalTitle && (
+              <span className="max-w-full truncate text-xs text-neutral-500">
+                {goalTitle}
+              </span>
+            )}
 
-          {due && <span className="text-xs text-neutral-500">{due}</span>}
-        </div>
+            {goalTitle && due && (
+              <span aria-hidden="true" className="text-neutral-300">
+                ·
+              </span>
+            )}
+
+            {due && <span className="text-xs text-neutral-500">{due}</span>}
+          </div>
+        )}
       </div>
 
       {/* Priority */}
 
-      <Badge variant={task.priority === "high" ? "default" : "muted"}>
-        {priorityLabels[task.priority]}
-      </Badge>
+      <div className="shrink-0">
+        <Badge variant={task.priority === "high" ? "default" : "muted"}>
+          {priorityLabels[task.priority]}
+        </Badge>
+      </div>
 
       {/* Actions */}
 
-      <div className="flex shrink-0 items-center gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
-        <button
-          type="button"
-          onClick={() => onEdit?.(task)}
-          className="rounded-md px-2 py-1 text-xs text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-950"
-        >
-          Edit
-        </button>
+      <div
+        className={[
+          "flex shrink-0 items-center gap-1",
+          "opacity-100 sm:opacity-0",
+          "sm:transition-opacity sm:group-hover:opacity-100",
+          "sm:group-focus-within:opacity-100",
+        ].join(" ")}
+      >
+        {onEdit && (
+          <button
+            type="button"
+            onClick={() => onEdit(task)}
+            aria-label={`Edit "${task.title}"`}
+            className="rounded-md px-2 py-1.5 text-xs text-neutral-500 outline-none transition-colors hover:bg-neutral-100 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-neutral-300"
+          >
+            Edit
+          </button>
+        )}
 
-        <button
-          type="button"
-          onClick={() => onDelete?.(task)}
-          className="rounded-md px-2 py-1 text-xs text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
-        >
-          Delete
-        </button>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(task)}
+            aria-label={`Delete "${task.title}"`}
+            className="rounded-md px-2 py-1.5 text-xs text-red-500 outline-none transition-colors hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-200"
+          >
+            Delete
+          </button>
+        )}
       </div>
-    </div>
+    </article>
   );
 }
