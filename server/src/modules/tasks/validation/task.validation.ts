@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const optionalObjectId = z
+  .string()
+  .trim()
+  .refine((value) => /^[a-f\d]{24}$/i.test(value), "Invalid goal ID")
+  .optional();
+
 export const createTaskSchema = z.object({
   title: z
     .string()
@@ -13,7 +19,7 @@ export const createTaskSchema = z.object({
     .max(1000, "Description must be 1000 characters or less")
     .optional(),
 
-  goal: z.string().trim().optional(),
+  goal: optionalObjectId,
 
   priority: z.enum(["low", "medium", "high"]).default("medium"),
 
@@ -22,8 +28,6 @@ export const createTaskSchema = z.object({
 
 export const updateTaskSchema = createTaskSchema.partial().extend({
   status: z.enum(["pending", "completed"]).optional(),
-
-  priority: z.enum(["low", "medium", "high"]).optional(),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;

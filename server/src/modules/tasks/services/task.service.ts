@@ -6,12 +6,32 @@ import type {
   CreateTaskInput,
   UpdateTaskInput,
 } from "../validation/task.validation";
+import { Goal } from "../../goals/models/Goal";
 
 export async function createTask(userId: string, data: CreateTaskInput) {
-  return Task.create({
-    user: new Types.ObjectId(userId),
+  const taskData = {
     ...data,
-  });
+    user: new Types.ObjectId(userId),
+  };
+
+  if (data.goal) {
+    if (!Types.ObjectId.isValid(data.goal)) {
+      throw new Error("Invalid goal ID");
+    }
+
+    const goal = await Goal.findOne({
+      _id: data.goal,
+      user: new Types.ObjectId(userId),
+    });
+
+    if (!goal) {
+      throw new Error("Goal not found");
+    }
+
+    taskData.goal = new Types.ObjectId(data.goal) as any;
+  }
+
+  return Task.create(taskData);
 }
 
 export async function getTasks(userId: string) {
