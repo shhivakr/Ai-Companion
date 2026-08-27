@@ -11,13 +11,13 @@ export default function Topbar() {
 
   return (
     <>
-      <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 text-neutral-950 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 sm:px-6">
+      <header className="flex h-16 items-center justify-between border-b border-border bg-surface px-4 text-foreground sm:px-6">
         {/* Left */}
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={() => setMobileNavOpen(true)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-neutral-200 text-neutral-600 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-950 lg:hidden"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-foreground-secondary transition hover:bg-surface-elevated hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground-muted focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:hidden"
           >
             <svg
               width="18"
@@ -38,7 +38,7 @@ export default function Topbar() {
 
           <button
             type="button"
-            className="hidden h-9 w-full max-w-md items-center justify-between rounded-lg border border-neutral-200 bg-white px-3 text-sm text-neutral-500 transition hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:border-neutral-700 dark:hover:bg-neutral-800 sm:flex"
+            className="hidden h-9 w-full max-w-md items-center justify-between rounded-lg border border-border bg-surface-elevated px-3 text-sm text-foreground-secondary transition hover:border-foreground-muted sm:flex"
           >
             <span className="flex items-center gap-2">
               <svg
@@ -57,7 +57,7 @@ export default function Topbar() {
               <span>Search or ask SIVRA...</span>
             </span>
 
-            <span className="rounded border border-neutral-200 px-1.5 py-0.5 text-[10px] text-neutral-400 dark:border-neutral-700 dark:text-neutral-500">
+            <span className="rounded border border-border px-1.5 py-0.5 text-[10px] text-foreground-muted">
               Ctrl K
             </span>
           </button>
@@ -70,7 +70,7 @@ export default function Topbar() {
 
           <Link
             href="/notifications"
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg text-neutral-600 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-neutral-400 dark:hover:bg-neutral-900 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-950"
+            className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary transition hover:bg-surface-elevated hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground-muted focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="Notifications"
           >
             <svg
@@ -87,14 +87,14 @@ export default function Topbar() {
               <path d="M10 21h4" />
             </svg>
             {/* Unread indicator */}
-            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-neutral-950 dark:bg-white" />
+            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-foreground" />
           </Link>
 
           {/* Profile */}
 
           <Link
             href="/settings"
-            className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-neutral-950 text-xs font-medium text-white transition hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-950"
+            className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-xs font-medium text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground-muted focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             S
           </Link>

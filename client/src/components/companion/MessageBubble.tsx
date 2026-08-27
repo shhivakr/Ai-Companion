@@ -16,8 +16,8 @@ export default function MessageBubble({ role, children }: MessageBubbleProps) {
       className={[
         "max-w-2xl rounded-2xl px-5 py-4",
         isUser
-          ? "ml-auto bg-neutral-950 text-white"
-          : "border border-neutral-200 bg-white text-neutral-950",
+          ? "ml-auto border border-border bg-surface-elevated text-foreground"
+          : "border border-border bg-surface text-foreground",
       ].join(" ")}
     >
       {isUser ? (
@@ -60,12 +60,12 @@ export default function MessageBubble({ role, children }: MessageBubbleProps) {
               ),
 
               blockquote: ({ children }) => (
-                <blockquote className="my-3 border-l-2 border-neutral-300 pl-4 text-neutral-600">
+                <blockquote className="my-3 border-l-2 border-border pl-4 text-foreground-secondary">
                   {children}
                 </blockquote>
               ),
 
-              hr: () => <hr className="my-4 border-neutral-200" />,
+              hr: () => <hr className="my-4 border-border" />,
             }}
           >
             {String(children)}

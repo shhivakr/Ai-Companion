@@ -17,7 +17,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-neutral-200 bg-white text-neutral-950 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 lg:flex lg:flex-col">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-surface text-foreground lg:flex lg:flex-col">
       {/* Brand */}
       <div className="flex h-20 items-center px-5">
         <Link href="/" className="flex items-center gap-3">
@@ -28,11 +28,11 @@ export default function Sidebar() {
           />
 
           <div>
-            <p className="text-[15px] font-semibold tracking-tight text-neutral-950 dark:text-white">
+            <p className="text-[15px] font-semibold tracking-tight text-foreground">
               SIVRA
             </p>
 
-            <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+            <p className="text-[11px] text-foreground-secondary">
               Your personal AI companion
             </p>
           </div>
@@ -53,8 +53,8 @@ export default function Sidebar() {
                 className={[
                   "flex h-10 items-center rounded-lg px-3 text-sm transition-colors",
                   active
-                    ? "bg-neutral-100 font-medium text-neutral-950 dark:bg-neutral-800 dark:text-white"
-                    : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-950 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white",
+                    ? "bg-surface-elevated font-medium text-foreground"
+                    : "text-foreground-secondary hover:bg-surface-elevated hover:text-foreground",
                 ].join(" ")}
               >
                 {item.label}
@@ -64,14 +64,14 @@ export default function Sidebar() {
         </div>
       </nav>
       {/* Settings */}
-      <div className="border-t border-neutral-200 p-3 dark:border-neutral-800">
+      <div className="border-t border-border p-3">
         <Link
           href="/settings"
           className={[
             "flex h-10 items-center rounded-lg px-3 text-sm transition-colors",
             pathname === "/settings"
-              ? "bg-neutral-100 font-medium text-neutral-950 dark:bg-neutral-800 dark:text-white"
-              : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-950 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white",
+              ? "bg-surface-elevated font-medium text-foreground"
+              : "text-foreground-secondary hover:bg-surface-elevated hover:text-foreground",
           ].join(" ")}
         >
           Settings

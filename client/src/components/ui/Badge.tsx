@@ -12,9 +12,8 @@ export default function Badge({
 }: BadgeProps) {
   const variants = {
     default:
-      "border border-neutral-200 bg-neutral-100 text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-100",
-    muted:
-      "border border-transparent bg-neutral-50 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400",
+      "border border-border bg-surface-elevated text-foreground",
+    muted: "border border-transparent bg-surface text-foreground-muted",
   };
 
   return (

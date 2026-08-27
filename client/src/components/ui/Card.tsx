@@ -7,7 +7,7 @@ export default function Card({
 }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`rounded-2xl border border-neutral-200 bg-white text-neutral-950 dark:!border-neutral-800 dark:!bg-neutral-900 dark:!text-neutral-100 ${className}`}
+      className={`rounded-2xl border border-border bg-surface text-foreground dark:!border-border dark:!bg-surface dark:!text-foreground ${className}`}
       {...props}
     >
       {children}

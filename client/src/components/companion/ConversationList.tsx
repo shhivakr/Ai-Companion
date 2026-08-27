@@ -45,16 +45,16 @@ export default function ConversationList({
   if (isLoading) {
     return (
       <div className="space-y-2">
-        <div className="h-10 animate-pulse rounded-lg bg-neutral-100" />
-        <div className="h-10 animate-pulse rounded-lg bg-neutral-100" />
-        <div className="h-10 animate-pulse rounded-lg bg-neutral-100" />
+        <div className="h-10 animate-pulse rounded-lg bg-surface-elevated" />
+        <div className="h-10 animate-pulse rounded-lg bg-surface-elevated" />
+        <div className="h-10 animate-pulse rounded-lg bg-surface-elevated" />
       </div>
     );
   }
 
   if (conversations.length === 0) {
     return (
-      <p className="text-sm leading-5 text-neutral-500">
+      <p className="text-sm leading-5 text-foreground-secondary">
         Your conversations will appear here.
       </p>
     );
@@ -72,20 +72,22 @@ export default function ConversationList({
             onClick={() => onSelect(conversation.conversationId)}
             className={[
               "w-full rounded-lg px-3 py-2.5 text-left transition-colors",
-              active ? "bg-neutral-100" : "hover:bg-neutral-50",
+              active ? "bg-surface-elevated" : "hover:bg-surface-elevated",
             ].join(" ")}
           >
             <div className="flex items-start justify-between gap-3">
               <p
                 className={[
                   "min-w-0 flex-1 truncate text-sm",
-                  active ? "font-medium text-neutral-950" : "text-neutral-700",
+                  active
+                    ? "font-medium text-foreground"
+                    : "text-foreground-secondary",
                 ].join(" ")}
               >
                 {conversation.title}
               </p>
 
-              <span className="shrink-0 text-[11px] text-neutral-400">
+              <span className="shrink-0 text-[11px] text-foreground-muted">
                 {formatConversationDate(conversation.updatedAt)}
               </span>
             </div>
