@@ -7,25 +7,127 @@ import Button from "@/components/ui/Button";
 import CheckinOption from "@/components/checkins/CheckinOption";
 import CheckinSummary from "@/components/checkins/CheckinSummary";
 
-const recentCheckins = [
+import {
+  type CheckInEnergy,
+  type CheckInFeeling,
+  type CheckInFocus,
+} from "@/lib/api/checkin.api";
+
+import { useCheckIns } from "@/hooks/useCheckIns";
+
+const feelingOptions: {
+  label: string;
+  value: CheckInFeeling;
+  description: string;
+}[] = [
   {
-    date: "Sunday, August 24",
-    feeling: "Good",
-    energy: "High",
-    focus: "Product work",
+    label: "Good",
+    value: "good",
+    description: "Feeling positive and steady.",
   },
   {
-    date: "Saturday, August 23",
-    feeling: "Okay",
-    energy: "Medium",
-    focus: "Learning",
+    label: "Okay",
+    value: "okay",
+    description: "Nothing major, just getting through it.",
+  },
+  {
+    label: "Low",
+    value: "low",
+    description: "Feeling a little off today.",
   },
 ];
 
+const energyOptions: {
+  label: string;
+  value: CheckInEnergy;
+  description: string;
+}[] = [
+  {
+    label: "High",
+    value: "high",
+    description: "Ready to take on meaningful work.",
+  },
+  {
+    label: "Medium",
+    value: "medium",
+    description: "Can focus, but need reasonable pacing.",
+  },
+  {
+    label: "Low",
+    value: "low",
+    description: "Better suited for lighter work.",
+  },
+];
+
+const focusOptions: {
+  label: string;
+  value: CheckInFocus;
+}[] = [
+  {
+    label: "Product work",
+    value: "product_work",
+  },
+  {
+    label: "Client work",
+    value: "client_work",
+  },
+  {
+    label: "Learning",
+    value: "learning",
+  },
+];
+
+function formatLabel(value: string) {
+  return value
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export default function CheckinsPage() {
-  const [feeling, setFeeling] = useState("");
-  const [energy, setEnergy] = useState("");
-  const [focus, setFocus] = useState("");
+  const {
+    checkIns,
+    todayCheckIn,
+    isLoading,
+    isCreating,
+    error,
+    createCheckIn,
+  } = useCheckIns();
+
+  const [feeling, setFeeling] = useState<CheckInFeeling | "">("");
+  const [energy, setEnergy] = useState<CheckInEnergy | "">("");
+  const [focus, setFocus] = useState<CheckInFocus | "">("");
+  const [note, setNote] = useState("");
+
+  async function handleSubmit() {
+    if (!feeling || !energy || !focus || isCreating) {
+      return;
+    }
+
+    try {
+      await createCheckIn({
+        feeling,
+        energy,
+        focus,
+        note: note.trim() || undefined,
+      });
+
+      setFeeling("");
+      setEnergy("");
+      setFocus("");
+      setNote("");
+    } catch {
+      // Error is exposed through the hook.
+    }
+  }
 
   return (
     <div className="space-y-8 py-6">
@@ -42,6 +144,48 @@ export default function CheckinsPage() {
           Take a moment to capture where you are right now.
         </p>
       </section>
+
+      {/* Today's Check-in */}
+
+      {todayCheckIn && (
+        <Card className="border-neutral-200 bg-neutral-50 p-5">
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Today's check-in
+          </p>
+
+          <div className="mt-3 flex flex-wrap gap-2 text-sm">
+            <span className="rounded-full border border-neutral-200 bg-white px-3 py-1.5">
+              Feeling · {formatLabel(todayCheckIn.feeling)}
+            </span>
+
+            <span className="rounded-full border border-neutral-200 bg-white px-3 py-1.5">
+              Energy · {formatLabel(todayCheckIn.energy)}
+            </span>
+
+            <span className="rounded-full border border-neutral-200 bg-white px-3 py-1.5">
+              Focus · {formatLabel(todayCheckIn.focus)}
+            </span>
+          </div>
+
+          {todayCheckIn.note && (
+            <p className="mt-4 text-sm leading-6 text-neutral-600">
+              {todayCheckIn.note}
+            </p>
+          )}
+        </Card>
+      )}
+
+      {/* Error */}
+
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm text-red-600">
+            {error instanceof Error
+              ? error.message
+              : "Unable to load check-ins."}
+          </p>
+        </div>
+      )}
 
       {/* Check-in Form */}
 
@@ -65,25 +209,13 @@ export default function CheckinsPage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  label: "Good",
-                  description: "Feeling positive and steady.",
-                },
-                {
-                  label: "Okay",
-                  description: "Nothing major, just getting through it.",
-                },
-                {
-                  label: "Low",
-                  description: "Feeling a little off today.",
-                },
-              ].map((option) => (
+              {feelingOptions.map((option) => (
                 <CheckinOption
-                  key={option.label}
-                  {...option}
-                  selected={feeling === option.label}
-                  onClick={() => setFeeling(option.label)}
+                  key={option.value}
+                  label={option.label}
+                  description={option.description}
+                  selected={feeling === option.value}
+                  onClick={() => setFeeling(option.value)}
                 />
               ))}
             </div>
@@ -103,25 +235,13 @@ export default function CheckinsPage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  label: "High",
-                  description: "Ready to take on meaningful work.",
-                },
-                {
-                  label: "Medium",
-                  description: "Can focus, but need reasonable pacing.",
-                },
-                {
-                  label: "Low",
-                  description: "Better suited for lighter work.",
-                },
-              ].map((option) => (
+              {energyOptions.map((option) => (
                 <CheckinOption
-                  key={option.label}
-                  {...option}
-                  selected={energy === option.label}
-                  onClick={() => setEnergy(option.label)}
+                  key={option.value}
+                  label={option.label}
+                  description={option.description}
+                  selected={energy === option.value}
+                  onClick={() => setEnergy(option.value)}
                 />
               ))}
             </div>
@@ -141,12 +261,12 @@ export default function CheckinsPage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              {["Product work", "Client work", "Learning"].map((option) => (
+              {focusOptions.map((option) => (
                 <CheckinOption
-                  key={option}
-                  label={option}
-                  selected={focus === option}
-                  onClick={() => setFocus(option)}
+                  key={option.value}
+                  label={option.label}
+                  selected={focus === option.value}
+                  onClick={() => setFocus(option.value)}
                 />
               ))}
             </div>
@@ -167,13 +287,25 @@ export default function CheckinsPage() {
 
             <textarea
               rows={4}
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              maxLength={1000}
               placeholder="Write a short note..."
               className="w-full resize-none rounded-xl border border-neutral-200 p-4 text-sm outline-none placeholder:text-neutral-400 focus:border-neutral-400"
             />
+
+            <p className="mt-2 text-right text-xs text-neutral-400">
+              {note.length}/1000
+            </p>
           </section>
 
           <div className="flex justify-end border-t border-neutral-100 pt-6">
-            <Button>Complete check-in</Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={!feeling || !energy || !focus || isCreating}
+            >
+              {isCreating ? "Saving..." : "Complete check-in"}
+            </Button>
           </div>
         </div>
       </Card>
@@ -190,9 +322,23 @@ export default function CheckinsPage() {
         </div>
 
         <div className="space-y-3">
-          {recentCheckins.map((checkin) => (
-            <CheckinSummary key={checkin.date} {...checkin} />
-          ))}
+          {isLoading ? (
+            <p className="text-sm text-neutral-500">
+              Loading your check-ins...
+            </p>
+          ) : checkIns.length > 0 ? (
+            checkIns.map((checkIn) => (
+              <CheckinSummary
+                key={checkIn._id}
+                date={formatDate(checkIn.createdAt)}
+                feeling={formatLabel(checkIn.feeling)}
+                energy={formatLabel(checkIn.energy)}
+                focus={formatLabel(checkIn.focus)}
+              />
+            ))
+          ) : (
+            <p className="text-sm text-neutral-500">No check-ins yet.</p>
+          )}
         </div>
       </section>
 
