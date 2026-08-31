@@ -45,6 +45,11 @@
       "key": "userPassword",
       "value": "password123",
       "type": "string"
+    },
+    {
+      "key": "memoryId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -2319,6 +2324,357 @@
                 }
               ]
             }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Memory",
+      "item": [
+        {
+          "name": "Create Memory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Works better with one clear priority\",\n  \"content\": \"Having one clear priority helps maintain focus and momentum.\",\n  \"category\": \"working_style\",\n  \"source\": \"manual\",\n  \"importance\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/memory"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains message and memory object\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Memory created successfully');",
+                  "    pm.expect(json.memory).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test(\"Created memory ID is saved\", function () {",
+                  "    const json = pm.response.json();",
+                  "    const memoryId = json.memory._id || json.memory.id;",
+                  "    pm.expect(memoryId).to.be.a('string');",
+                  "    pm.collectionVariables.set('memoryId', memoryId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Memories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/memory"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains memories\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.memories).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Memory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/memory/{{memoryId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains memory\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.memory).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Memory",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Works best with one clear priority\",\n  \"importance\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/memory/{{memoryId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains message and updated memory\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Memory updated successfully');",
+                  "    pm.expect(json.memory).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test(\"Returned memory ID matches\", function () {",
+                  "    const json = pm.response.json();",
+                  "    const returnedId = json.memory._id || json.memory.id;",
+                  "    pm.expect(returnedId).to.eql(pm.collectionVariables.get('memoryId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Memory",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/memory/{{memoryId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms deletion\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Memory deleted successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Memories By Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/memory?category=working_style",
+              "host": ["{{baseUrl}}"],
+              "path": ["memory"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "working_style"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains memories array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.memories).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"All memories have category working_style\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    json.memories.forEach((item) => {",
+                  "        pm.expect(item.category).to.eql('working_style');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Memories By Source",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/memory?source=manual",
+              "host": ["{{baseUrl}}"],
+              "path": ["memory"],
+              "query": [
+                {
+                  "key": "source",
+                  "value": "manual"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains memories array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.memories).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"All memories have source manual\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    json.memories.forEach((item) => {",
+                  "        pm.expect(item.source).to.eql('manual');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Memory Errors",
+      "item": [
+        {
+          "name": "Invalid Memory Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Invalid memory\",\n  \"content\": \"This should fail validation.\",\n  \"category\": \"invalid_category\",\n  \"source\": \"manual\",\n  \"importance\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/memory"
           },
           "response": [],
           "event": [
