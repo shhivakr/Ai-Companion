@@ -1,45 +1,114 @@
+"use client";
+
+import { useState } from "react";
+
 import MemoryCard from "@/components/memory/MemoryCard";
+import MemoryForm from "@/components/memory/MemoryForm";
+import MemoryModal from "@/components/memory/MemoryModal";
+import MemoryEditForm from "@/components/memory/MemoryEditForm";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
-const memories = [
-  {
-    title: "Works better with one clear priority",
-    content:
-      "When there are too many competing tasks, focusing on one meaningful priority helps maintain momentum.",
-    category: "Working style",
-    updatedAt: "Today",
-    source: "Check-ins",
-  },
-  {
-    title: "Building a personal AI productivity companion",
-    content:
-      "The current product is being built as a personal AI companion for planning, reflection, goals, tasks and context.",
-    category: "Project",
-    updatedAt: "Today",
-    source: "Conversation",
-  },
-  {
-    title: "Product development is a major focus",
-    content:
-      "Current attention is centered around turning the product concept into a working application.",
-    category: "Focus",
-    updatedAt: "Yesterday",
-    source: "Goals",
-  },
-  {
-    title: "Prefers practical, step-by-step progress",
-    content:
-      "Breaking large projects into sequential implementation steps makes it easier to keep moving.",
-    category: "Working style",
-    updatedAt: "2 days ago",
-    source: "Conversation",
-  },
+import { type Memory, type MemoryCategory } from "@/lib/api/memory.api";
+
+import { useDeleteMemory, useMemories } from "@/hooks/useMemories";
+
+const categories: {
+  label: string;
+  value?: MemoryCategory;
+}[] = [
+  { label: "All" },
+  { label: "Working style", value: "working_style" },
+  { label: "Projects", value: "project" },
+  { label: "Focus", value: "focus" },
+  { label: "Preferences", value: "preference" },
 ];
 
-const categories = ["All", "Working style", "Projects", "Focus", "Preferences"];
+function formatCategory(category: MemoryCategory) {
+  const labels: Record<MemoryCategory, string> = {
+    working_style: "Working style",
+    project: "Project",
+    focus: "Focus",
+    preference: "Preference",
+  };
+
+  return labels[category];
+}
+
+function formatSource(source: string) {
+  const labels: Record<string, string> = {
+    conversation: "Conversation",
+    checkin: "Check-ins",
+    goal: "Goals",
+    task: "Tasks",
+    manual: "Manual",
+  };
+
+  return labels[source] ?? source;
+}
+
+function formatUpdatedAt(date: string) {
+  const value = new Date(date);
+  const now = new Date();
+
+  const isToday =
+    value.getFullYear() === now.getFullYear() &&
+    value.getMonth() === now.getMonth() &&
+    value.getDate() === now.getDate();
+
+  if (isToday) {
+    return "Today";
+  }
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+
+  const isYesterday =
+    value.getFullYear() === yesterday.getFullYear() &&
+    value.getMonth() === yesterday.getMonth() &&
+    value.getDate() === yesterday.getDate();
+
+  if (isYesterday) {
+    return "Yesterday";
+  }
+
+  return value.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export default function MemoryPage() {
+  const [selectedCategory, setSelectedCategory] = useState<
+    MemoryCategory | undefined
+  >(undefined);
+
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  const [memoryToDelete, setMemoryToDelete] = useState<Memory | null>(null);
+  const [memoryToEdit, setMemoryToEdit] = useState<Memory | null>(null);
+  const memoriesQuery = useMemories(
+    selectedCategory ? { category: selectedCategory } : undefined,
+  );
+
+  const deleteMemoryMutation = useDeleteMemory();
+
+  async function handleDelete() {
+    if (!memoryToDelete) {
+      return;
+    }
+
+    try {
+      await deleteMemoryMutation.mutateAsync(memoryToDelete._id);
+
+      setMemoryToDelete(null);
+    } catch {
+      // Mutation error is handled by the mutation state.
+    }
+  }
+
   return (
     <div className="space-y-8 py-6">
       {/* Header */}
@@ -57,7 +126,9 @@ export default function MemoryPage() {
           </p>
         </div>
 
-        <Button>Add memory</Button>
+        <Button type="button" onClick={() => setIsCreateOpen(true)}>
+          Add memory
+        </Button>
       </section>
 
       {/* Memory explanation */}
@@ -80,29 +151,84 @@ export default function MemoryPage() {
       {/* Filters */}
 
       <div className="flex items-center gap-1 overflow-x-auto border-b border-neutral-200">
-        {categories.map((category, index) => (
-          <button
-            key={category}
-            type="button"
-            className={[
-              "shrink-0 px-3 py-3 text-sm",
-              index === 0
-                ? "border-b-2 border-neutral-950 font-medium text-neutral-950"
-                : "text-neutral-500",
-            ].join(" ")}
-          >
-            {category}
-          </button>
-        ))}
+        {categories.map((item) => {
+          const isActive = selectedCategory === item.value;
+
+          return (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => setSelectedCategory(item.value)}
+              className={[
+                "shrink-0 px-3 py-3 text-sm",
+                isActive
+                  ? "border-b-2 border-neutral-950 font-medium text-neutral-950"
+                  : "text-neutral-500",
+              ].join(" ")}
+            >
+              {item.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Memory list */}
 
-      <section className="grid gap-5 lg:grid-cols-2">
-        {memories.map((memory) => (
-          <MemoryCard key={memory.title} {...memory} />
-        ))}
-      </section>
+      {memoriesQuery.isLoading && (
+        <section className="grid gap-5 lg:grid-cols-2">
+          <Card className="p-6">
+            <p className="text-sm text-neutral-500">Loading memories...</p>
+          </Card>
+        </section>
+      )}
+
+      {memoriesQuery.isError && (
+        <section className="grid gap-5 lg:grid-cols-2">
+          <Card className="p-6">
+            <p className="text-sm text-red-600">
+              Unable to load memories. Please try again.
+            </p>
+          </Card>
+        </section>
+      )}
+
+      {!memoriesQuery.isLoading &&
+        !memoriesQuery.isError &&
+        memoriesQuery.data?.length === 0 && (
+          <section className="grid gap-5 lg:grid-cols-2">
+            <Card className="p-6">
+              <h3 className="font-semibold">No memories found</h3>
+
+              <p className="mt-2 text-sm leading-6 text-neutral-500">
+                Add something you want Companion to remember.
+              </p>
+            </Card>
+          </section>
+        )}
+
+      {!memoriesQuery.isLoading &&
+        !memoriesQuery.isError &&
+        memoriesQuery.data &&
+        memoriesQuery.data.length > 0 && (
+          <section className="grid gap-5 lg:grid-cols-2">
+            {memoriesQuery.data.map((memory) => (
+              <MemoryCard
+                key={memory._id}
+                title={memory.title}
+                content={memory.content}
+                category={formatCategory(memory.category)}
+                updatedAt={formatUpdatedAt(memory.updatedAt)}
+                source={formatSource(memory.source)}
+                onEdit={() => setMemoryToEdit(memory)}
+                onDelete={() => setMemoryToDelete(memory)}
+                deleting={
+                  deleteMemoryMutation.isPending &&
+                  deleteMemoryMutation.variables === memory._id
+                }
+              />
+            ))}
+          </section>
+        )}
 
       {/* Privacy / control */}
 
@@ -119,6 +245,46 @@ export default function MemoryPage() {
           <Button variant="secondary">Manage settings</Button>
         </div>
       </section>
+
+      {/* Create Memory */}
+
+      <MemoryModal open={isCreateOpen} onClose={() => setIsCreateOpen(false)}>
+        <MemoryForm
+          onSuccess={() => setIsCreateOpen(false)}
+          onCancel={() => setIsCreateOpen(false)}
+        />
+      </MemoryModal>
+
+      {/* Delete Memory */}
+
+      <ConfirmDialog
+        open={Boolean(memoryToDelete)}
+        onClose={() => {
+          if (!deleteMemoryMutation.isPending) {
+            setMemoryToDelete(null);
+          }
+        }}
+        onConfirm={handleDelete}
+        title="Delete memory?"
+        description="This memory will be permanently removed from your Companion context."
+        confirmLabel={
+          deleteMemoryMutation.isPending ? "Deleting..." : "Delete memory"
+        }
+        destructive
+      />
+      {/* Edit Memory */}
+      <MemoryModal
+        open={Boolean(memoryToEdit)}
+        onClose={() => setMemoryToEdit(null)}
+      >
+        {memoryToEdit && (
+          <MemoryEditForm
+            memory={memoryToEdit}
+            onSuccess={() => setMemoryToEdit(null)}
+            onCancel={() => setMemoryToEdit(null)}
+          />
+        )}
+      </MemoryModal>
     </div>
   );
 }
