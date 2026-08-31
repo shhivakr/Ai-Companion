@@ -1,54 +1,82 @@
+"use client";
+
+import { useState } from "react";
+
 import Card from "@/components/ui/Card";
 import TimelineItem from "@/components/timeline/TimelineItem";
 
-const today = [
-  {
-    time: "10:42 AM",
-    title: "Completed morning check-in",
-    description:
-      "You reported good energy and chose product work as your main focus.",
-    type: "checkin" as const,
-  },
-  {
-    time: "10:18 AM",
-    title: "Started onboarding UI",
-    description:
-      "You started working on the next milestone for your product goal.",
-    type: "task" as const,
-  },
-  {
-    time: "9:55 AM",
-    title: "Companion suggested a focus",
-    description:
-      "Finish onboarding UI was identified as the most useful next step.",
-    type: "companion" as const,
-  },
-  {
-    time: "9:30 AM",
-    title: "Product goal moved forward",
-    description:
-      "Your progress increased after completing the project setup milestone.",
-    type: "goal" as const,
-  },
+import {
+  type TimelineItem as TimelineEvent,
+  type TimelineType,
+} from "@/lib/api/timeline.api";
+
+import { useTimeline } from "@/hooks/useTimeline";
+
+const filters: {
+  label: string;
+  value: TimelineType;
+}[] = [
+  { label: "All", value: "all" },
+  { label: "Tasks", value: "task" },
+  { label: "Goals", value: "goal" },
+  { label: "Check-ins", value: "checkin" },
 ];
 
-const yesterday = [
-  {
-    time: "8:40 PM",
-    title: "Completed project setup",
-    description:
-      "Repository and initial development environment were completed.",
-    type: "task" as const,
-  },
-  {
-    time: "8:15 AM",
-    title: "Morning check-in",
-    description: "You reported medium energy and chose learning as your focus.",
-    type: "checkin" as const,
-  },
-];
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function formatTime(date: string) {
+  return new Date(date).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function isSameDay(date: string, target: Date) {
+  const value = new Date(date);
+
+  return (
+    value.getFullYear() === target.getFullYear() &&
+    value.getMonth() === target.getMonth() &&
+    value.getDate() === target.getDate()
+  );
+}
+
+function groupByDay(items: TimelineEvent[]) {
+  const groups = new Map<string, TimelineEvent[]>();
+
+  for (const item of items) {
+    const key = new Date(item.createdAt).toDateString();
+
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.push(item);
+    } else {
+      groups.set(key, [item]);
+    }
+  }
+
+  return Array.from(groups.values()).map((items) => ({
+    date: items[0].createdAt,
+    items,
+  }));
+}
 
 export default function TimelinePage() {
+  const [activeFilter, setActiveFilter] = useState<TimelineType>("all");
+
+  const { timeline, isLoading, isFetching, error } = useTimeline(activeFilter);
+
+  const groupedTimeline = groupByDay(timeline);
+
+  const today = new Date();
+
   return (
     <div className="space-y-8 py-6">
       {/* Header */}
@@ -69,59 +97,103 @@ export default function TimelinePage() {
       {/* Filters */}
 
       <div className="flex items-center gap-1 overflow-x-auto border-b border-neutral-200">
-        {["All", "Tasks", "Goals", "Check-ins", "Companion"].map(
-          (filter, index) => (
+        {filters.map((filter) => {
+          const isActive = activeFilter === filter.value;
+
+          return (
             <button
-              key={filter}
+              key={filter.value}
               type="button"
+              onClick={() => setActiveFilter(filter.value)}
               className={[
-                "shrink-0 px-3 py-3 text-sm",
-                index === 0
+                "shrink-0 px-3 py-3 text-sm transition-colors",
+                isActive
                   ? "border-b-2 border-neutral-950 font-medium text-neutral-950"
-                  : "text-neutral-500",
+                  : "text-neutral-500 hover:text-neutral-950",
               ].join(" ")}
             >
-              {filter}
+              {filter.label}
             </button>
-          ),
-        )}
+          );
+        })}
       </div>
 
-      {/* Today */}
+      {/* Loading */}
 
-      <section>
-        <div className="mb-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-            Monday, August 25
-          </p>
-
-          <h2 className="mt-1 text-xl font-semibold">Today</h2>
-        </div>
-
+      {isLoading && (
         <Card className="p-6">
-          {today.map((item) => (
-            <TimelineItem key={`${item.time}-${item.title}`} {...item} />
-          ))}
+          <p className="text-sm text-neutral-500">Loading your timeline...</p>
         </Card>
-      </section>
+      )}
 
-      {/* Yesterday */}
+      {/* Error */}
 
-      <section>
-        <div className="mb-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-            Sunday, August 24
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm text-red-600">
+            {error instanceof Error
+              ? error.message
+              : "Unable to load timeline."}
           </p>
-
-          <h2 className="mt-1 text-xl font-semibold">Yesterday</h2>
         </div>
+      )}
 
-        <Card className="p-6">
-          {yesterday.map((item) => (
-            <TimelineItem key={`${item.time}-${item.title}`} {...item} />
-          ))}
+      {/* Timeline */}
+
+      {!isLoading && !error && groupedTimeline.length > 0 && (
+        <div className="space-y-8">
+          {groupedTimeline.map((group) => {
+            const groupDate = new Date(group.date);
+            const isToday = isSameDay(group.date, today);
+
+            return (
+              <section key={groupDate.toDateString()}>
+                <div className="mb-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+                    {formatDate(group.date)}
+                  </p>
+
+                  <h2 className="mt-1 text-xl font-semibold">
+                    {isToday ? "Today" : "Activity"}
+                  </h2>
+                </div>
+
+                <Card className="p-6">
+                  {group.items.map((item) => (
+                    <TimelineItem
+                      key={item.id}
+                      time={formatTime(item.createdAt)}
+                      title={item.title}
+                      description={item.description}
+                       type={item.type === "companion" ? "task" : item.type}
+                    />
+                  ))}
+                </Card>
+              </section>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Empty */}
+
+      {!isLoading && !error && groupedTimeline.length === 0 && (
+        <Card className="p-8">
+          <div className="max-w-md">
+            <p className="text-sm font-medium">No activity yet</p>
+
+            <p className="mt-2 text-sm leading-6 text-neutral-500">
+              Your goals, tasks and check-ins will appear here as you use SIVRA.
+            </p>
+          </div>
         </Card>
-      </section>
+      )}
+
+      {/* Refresh indicator */}
+
+      {!isLoading && isFetching && (
+        <p className="text-xs text-neutral-400">Updating timeline...</p>
+      )}
 
       {/* Companion Insight */}
 
@@ -131,12 +203,12 @@ export default function TimelinePage() {
         </p>
 
         <h2 className="mt-3 text-lg font-semibold">
-          Small actions are adding up.
+          Your activity tells a story.
         </h2>
 
         <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
-          Your recent activity shows a consistent pattern of turning goals into
-          smaller actions and returning to them regularly.
+          Over time, your timeline can help reveal patterns in how you work,
+          reflect and move toward your goals.
         </p>
       </section>
     </div>
