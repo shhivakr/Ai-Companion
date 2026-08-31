@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "personal-ai-companion-backend-collection",
     "name": "Personal AI Productivity Companion Backend",
-    "description": "Postman collection for the Personal AI Productivity Companion backend API.",
+    "description": "Postman collection for the Personal AI Productivity Companion backend API.\n\nWorkflow:\n1. Register or Login to get an accessToken\n2. Create Goals → save goalId\n3. Create Tasks (optionally linked to a goal) → save taskId\n4. Chat with Companion → save conversationId\n5. Create Check-ins\n\nAuthenticated requests use Bearer {{accessToken}}.\nRefresh token is stored in an httpOnly cookie by the backend.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -27,6 +27,16 @@
       "type": "string"
     },
     {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "checkInId",
+      "value": "",
+      "type": "string"
+    },
+    {
       "key": "userEmail",
       "value": "shiva@example.com",
       "type": "string"
@@ -38,6 +48,38 @@
     }
   ],
   "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains success and message\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "    pm.expect(json.message).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
     {
       "name": "Authentication",
       "item": [
@@ -78,10 +120,12 @@
                   "    pm.expect(json.success).to.eql(true);",
                   "});",
                   "",
-                  "pm.test(\"Response contains a user object\", function () {",
+                  "pm.test(\"Response contains user data\", function () {",
                   "    const json = pm.response.json();",
-                  "    const user = json.data && (json.data.user || json.data);",
-                  "    pm.expect(user).to.be.an('object');",
+                  "    pm.expect(json.data).to.be.an('object');",
+                  "    pm.expect(json.data.user).to.be.an('object');",
+                  "    pm.expect(json.data.user).to.have.property('name');",
+                  "    pm.expect(json.data.user).to.have.property('email');",
                   "});"
                 ]
               }
@@ -129,6 +173,13 @@
                   "    const json = pm.response.json();",
                   "    pm.expect(json.data.accessToken).to.be.a('string');",
                   "    pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains user data\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.user).to.be.an('object');",
+                  "    pm.expect(json.data.user).to.have.property('name');",
+                  "    pm.expect(json.data.user).to.have.property('email');",
                   "});"
                 ]
               }
@@ -163,10 +214,12 @@
                   "    pm.expect(json.success).to.eql(true);",
                   "});",
                   "",
-                  "pm.test(\"A userId exists in the response\", function () {",
+                  "pm.test(\"Response contains userId and user object\", function () {",
                   "    const json = pm.response.json();",
-                  "    const userId = json.data && (json.data.userId || json.data.id || json.data._id);",
-                  "    pm.expect(userId).to.exist;",
+                  "    pm.expect(json.data.userId).to.be.a('string');",
+                  "    pm.expect(json.data.user).to.be.an('object');",
+                  "    pm.expect(json.data.user).to.have.property('name');",
+                  "    pm.expect(json.data.user).to.have.property('email');",
                   "});"
                 ]
               }
@@ -177,7 +230,9 @@
           "name": "Refresh Token",
           "request": {
             "method": "POST",
-            "url": "{{baseUrl}}/auth/refresh"
+            "header": [],
+            "url": "{{baseUrl}}/auth/refresh",
+            "description": "Reads refreshToken from the httpOnly cookie set by Login. Postman automatically sends cookies for the same domain."
           },
           "response": [],
           "event": [
@@ -209,7 +264,9 @@
           "name": "Logout",
           "request": {
             "method": "POST",
-            "url": "{{baseUrl}}/auth/logout"
+            "header": [],
+            "url": "{{baseUrl}}/auth/logout",
+            "description": "Reads refreshToken from the httpOnly cookie, deletes it from the database, and clears the cookie."
           },
           "response": [],
           "event": [
@@ -225,6 +282,7 @@
                   "pm.test(\"Response contains success: true\", function () {",
                   "    const json = pm.response.json();",
                   "    pm.expect(json.success).to.eql(true);",
+                  "    pm.expect(json.message).to.eql('Logged out successfully');",
                   "});"
                 ]
               }
@@ -236,6 +294,90 @@
     {
       "name": "Authentication Errors",
       "item": [
+        {
+          "name": "Register - Missing Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/auth/register"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 500 (Zod validation error thrown)\", function () {",
+                  "    const code = pm.response.code;",
+                  "    pm.expect(code).to.be.oneOf([400, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains an error message\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register - Short Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test\",\n  \"email\": \"short@example.com\",\n  \"password\": \"abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/auth/register"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code indicates validation failure\", function () {",
+                  "    const code = pm.response.code;",
+                  "    pm.expect(code).to.be.oneOf([400, 500]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates failure\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "Duplicate Registration",
           "request": {
@@ -322,6 +464,7 @@
           "name": "Missing Access Token",
           "request": {
             "method": "GET",
+            "header": [],
             "url": "{{baseUrl}}/auth/me"
           },
           "response": [],
@@ -379,100 +522,8 @@
       ]
     },
     {
-      "name": "System",
-      "item": [
-        {
-          "name": "Health Check",
-          "request": {
-            "method": "GET",
-            "url": "{{baseUrl}}/health"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.expect(pm.response.code).to.eql(200);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "Goals",
       "item": [
-        {
-          "name": "Get Goals",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              }
-            ],
-            "url": "{{baseUrl}}/goals"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.expect(pm.response.code).to.eql(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response contains a goals array\", function () {",
-                  "    const json = pm.response.json();",
-                  "    const goals = Array.isArray(json) ? json : json.goals;",
-                  "    pm.expect(goals).to.be.an('array');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Goal",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              }
-            ],
-            "url": "{{baseUrl}}/goals/{{goalId}}"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.expect(pm.response.code).to.eql(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response contains a goal\", function () {",
-                  "    const json = pm.response.json();",
-                  "    const goal = json.goal || json;",
-                  "    pm.expect(goal).to.be.an('object');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
         {
           "name": "Create Goal",
           "request": {
@@ -509,18 +560,86 @@
                   "    pm.expect(pm.response.code).to.eql(201);",
                   "});",
                   "",
-                  "pm.test(\"Response contains a goal\", function () {",
+                  "pm.test(\"Response contains message and goal object\", function () {",
                   "    const json = pm.response.json();",
-                  "    const goal = json.goal || json;",
-                  "    pm.expect(goal).to.be.an('object');",
+                  "    pm.expect(json.message).to.eql('Goal created successfully');",
+                  "    pm.expect(json.goal).to.be.an('object');",
+                  "    pm.expect(json.goal).to.have.property('title');",
+                  "    pm.expect(json.goal).to.have.property('status');",
+                  "    pm.expect(json.goal).to.have.property('progress');",
                   "});",
                   "",
                   "pm.test(\"Created goal ID is saved\", function () {",
                   "    const json = pm.response.json();",
-                  "    const goal = json.goal || json;",
-                  "    const goalId = goal._id || goal.id;",
+                  "    const goalId = json.goal._id || json.goal.id;",
                   "    pm.expect(goalId).to.be.a('string');",
                   "    pm.collectionVariables.set('goalId', goalId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Goals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/goals"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains a goals array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.goals).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Goal by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/goals/{{goalId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains goal object\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.goal).to.be.an('object');",
+                  "    pm.expect(json.goal).to.have.property('_id');",
+                  "    pm.expect(json.goal).to.have.property('title');",
                   "});"
                 ]
               }
@@ -563,10 +682,11 @@
                   "    pm.expect(pm.response.code).to.eql(200);",
                   "});",
                   "",
-                  "pm.test(\"Response contains the updated goal\", function () {",
+                  "pm.test(\"Response contains message and updated goal\", function () {",
                   "    const json = pm.response.json();",
-                  "    const goal = json.goal || json;",
-                  "    pm.expect(goal).to.be.an('object');",
+                  "    pm.expect(json.message).to.eql('Goal updated successfully');",
+                  "    pm.expect(json.goal).to.be.an('object');",
+                  "    pm.expect(json.goal.progress).to.eql(25);",
                   "});"
                 ]
               }
@@ -594,6 +714,11 @@
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms deletion\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Goal deleted successfully');",
                   "});"
                 ]
               }
@@ -609,6 +734,7 @@
           "name": "Missing Access Token",
           "request": {
             "method": "GET",
+            "header": [],
             "url": "{{baseUrl}}/goals"
           },
           "response": [],
@@ -654,9 +780,9 @@
                   "    pm.expect(pm.response.code).to.eql(400);",
                   "});",
                   "",
-                  "pm.test(\"Response indicates failure\", function () {",
+                  "pm.test(\"Response indicates invalid ID\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.message).to.eql('Invalid goal ID');",
                   "});"
                 ]
               }
@@ -686,9 +812,9 @@
                   "    pm.expect(pm.response.code).to.eql(404);",
                   "});",
                   "",
-                  "pm.test(\"Response indicates failure\", function () {",
+                  "pm.test(\"Response indicates not found\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.message).to.eql('Goal not found');",
                   "});"
                 ]
               }
@@ -731,9 +857,10 @@
                   "    pm.expect(pm.response.code).to.eql(400);",
                   "});",
                   "",
-                  "pm.test(\"Response indicates failure\", function () {",
+                  "pm.test(\"Response indicates validation failure\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.message).to.eql('Invalid goal data');",
+                  "    pm.expect(json.errors).to.exist;",
                   "});"
                 ]
               }
@@ -763,7 +890,7 @@
                 }
               }
             },
-            "url": "{{baseUrl}}/goals/64c13ab08edf48a008793cad"
+            "url": "{{baseUrl}}/goals/{{goalId}}"
           },
           "response": [],
           "event": [
@@ -776,9 +903,10 @@
                   "    pm.expect(pm.response.code).to.eql(400);",
                   "});",
                   "",
-                  "pm.test(\"Response indicates failure\", function () {",
+                  "pm.test(\"Response indicates validation failure\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.message).to.eql('Invalid goal data');",
+                  "    pm.expect(json.errors).to.exist;",
                   "});"
                 ]
               }
@@ -790,72 +918,6 @@
     {
       "name": "Tasks",
       "item": [
-        {
-          "name": "Get Tasks",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              }
-            ],
-            "url": "{{baseUrl}}/tasks"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.expect(pm.response.code).to.eql(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response contains a tasks array\", function () {",
-                  "    const json = pm.response.json();",
-                  "    const tasks = Array.isArray(json) ? json : json.tasks;",
-                  "    pm.expect(tasks).to.be.an('array');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Task",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              }
-            ],
-            "url": "{{baseUrl}}/tasks/{{taskId}}"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.expect(pm.response.code).to.eql(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response contains a task\", function () {",
-                  "    const json = pm.response.json();",
-                  "    const task = json.task || json;",
-                  "    pm.expect(task).to.be.an('object');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
         {
           "name": "Create Task",
           "request": {
@@ -892,18 +954,132 @@
                   "    pm.expect(pm.response.code).to.eql(201);",
                   "});",
                   "",
-                  "pm.test(\"Response contains a task\", function () {",
+                  "pm.test(\"Response contains message and task object\", function () {",
                   "    const json = pm.response.json();",
-                  "    const task = json.task || json;",
-                  "    pm.expect(task).to.be.an('object');",
+                  "    pm.expect(json.message).to.eql('Task created successfully');",
+                  "    pm.expect(json.task).to.be.an('object');",
+                  "    pm.expect(json.task).to.have.property('title');",
+                  "    pm.expect(json.task).to.have.property('status');",
+                  "    pm.expect(json.task).to.have.property('priority');",
                   "});",
                   "",
                   "pm.test(\"Created task ID is saved\", function () {",
                   "    const json = pm.response.json();",
-                  "    const task = json.task || json;",
-                  "    const taskId = task._id || task.id;",
+                  "    const taskId = json.task._id || json.task.id;",
                   "    pm.expect(taskId).to.be.a('string');",
                   "    pm.collectionVariables.set('taskId', taskId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Task (linked to Goal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Task linked to a goal\",\n  \"description\": \"This task is associated with an existing goal.\",\n  \"goal\": \"{{goalId}}\",\n  \"priority\": \"medium\",\n  \"dueDate\": \"2026-12-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/tasks"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Task is linked to goal\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.task).to.be.an('object');",
+                  "    pm.expect(json.task.goal).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/tasks"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains a tasks array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.tasks).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Task by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/tasks/{{taskId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains task object\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.task).to.be.an('object');",
+                  "    pm.expect(json.task).to.have.property('_id');",
+                  "    pm.expect(json.task).to.have.property('title');",
                   "});"
                 ]
               }
@@ -946,10 +1122,11 @@
                   "    pm.expect(pm.response.code).to.eql(200);",
                   "});",
                   "",
-                  "pm.test(\"Response contains the updated task\", function () {",
+                  "pm.test(\"Response contains message and updated task\", function () {",
                   "    const json = pm.response.json();",
-                  "    const task = json.task || json;",
-                  "    pm.expect(task).to.be.an('object');",
+                  "    pm.expect(json.message).to.eql('Task updated successfully');",
+                  "    pm.expect(json.task).to.be.an('object');",
+                  "    pm.expect(json.task.status).to.eql('completed');",
                   "});"
                 ]
               }
@@ -977,6 +1154,11 @@
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms deletion\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Task deleted successfully');",
                   "});"
                 ]
               }
@@ -992,6 +1174,7 @@
           "name": "Missing Access Token",
           "request": {
             "method": "GET",
+            "header": [],
             "url": "{{baseUrl}}/tasks"
           },
           "response": [],
@@ -1037,9 +1220,9 @@
                   "    pm.expect(pm.response.code).to.eql(400);",
                   "});",
                   "",
-                  "pm.test(\"Response indicates failure\", function () {",
+                  "pm.test(\"Response indicates invalid ID\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.message).to.eql('Invalid task ID');",
                   "});"
                 ]
               }
@@ -1069,9 +1252,9 @@
                   "    pm.expect(pm.response.code).to.eql(404);",
                   "});",
                   "",
-                  "pm.test(\"Response indicates failure\", function () {",
+                  "pm.test(\"Response indicates not found\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.message).to.eql('Task not found');",
                   "});"
                 ]
               }
@@ -1114,9 +1297,10 @@
                   "    pm.expect(pm.response.code).to.eql(400);",
                   "});",
                   "",
-                  "pm.test(\"Response indicates failure\", function () {",
+                  "pm.test(\"Response indicates validation failure\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.message).to.eql('Invalid task data');",
+                  "    pm.expect(json.errors).to.exist;",
                   "});"
                 ]
               }
@@ -1146,7 +1330,7 @@
                 }
               }
             },
-            "url": "{{baseUrl}}/tasks/64c13ab08edf48a008793cb0"
+            "url": "{{baseUrl}}/tasks/{{taskId}}"
           },
           "response": [],
           "event": [
@@ -1159,9 +1343,10 @@
                   "    pm.expect(pm.response.code).to.eql(400);",
                   "});",
                   "",
-                  "pm.test(\"Response indicates failure\", function () {",
+                  "pm.test(\"Response indicates validation failure\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.message).to.eql('Invalid task data');",
+                  "    pm.expect(json.errors).to.exist;",
                   "});"
                 ]
               }
@@ -1174,7 +1359,7 @@
       "name": "Companion",
       "item": [
         {
-          "name": "Chat Companion",
+          "name": "Chat with Companion",
           "request": {
             "method": "POST",
             "header": [
@@ -1189,7 +1374,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"message\": \"Help me plan my next productive work session.\",\n  \"conversationId\": \"conv_001\"\n}",
+              "raw": "{\n  \"message\": \"Help me plan my next productive work session.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1209,10 +1394,152 @@
                   "    pm.expect(pm.response.code).to.eql(200);",
                   "});",
                   "",
-                  "pm.test(\"Response contains a companion message\", function () {",
+                  "pm.test(\"Response contains message and data\", function () {",
                   "    const json = pm.response.json();",
-                  "    const responseMessage = json.data && json.data.message ? json.data.message : json.message;",
-                  "    pm.expect(responseMessage).to.be.a('string');",
+                  "    pm.expect(json.message).to.eql('Companion response generated successfully');",
+                  "    pm.expect(json.data).to.be.an('object');",
+                  "    pm.expect(json.data.conversationId).to.be.a('string');",
+                  "    pm.expect(json.data.message).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test(\"Conversation ID is saved\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('conversationId', json.data.conversationId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chat with Companion (existing conversation)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"What should I focus on today?\",\n  \"conversationId\": \"{{conversationId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/companion/chat"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response continues same conversation\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.conversationId).to.eql(pm.collectionVariables.get('conversationId'));",
+                  "    pm.expect(json.data.message).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/companion/conversations"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains conversations array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.conversations).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Each conversation has expected shape\", function () {",
+                  "    const json = pm.response.json();",
+                  "    if (json.conversations.length > 0) {",
+                  "        const conv = json.conversations[0];",
+                  "        pm.expect(conv).to.have.property('conversationId');",
+                  "        pm.expect(conv).to.have.property('title');",
+                  "        pm.expect(conv).to.have.property('createdAt');",
+                  "        pm.expect(conv).to.have.property('updatedAt');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Conversation by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/companion/conversations/{{conversationId}}"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains conversation with messages\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.conversation).to.be.an('object');",
+                  "    pm.expect(json.conversation.conversationId).to.be.a('string');",
+                  "    pm.expect(json.conversation.title).to.be.a('string');",
+                  "    pm.expect(json.conversation.messages).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Messages have expected shape\", function () {",
+                  "    const json = pm.response.json();",
+                  "    if (json.conversation.messages.length > 0) {",
+                  "        const msg = json.conversation.messages[0];",
+                  "        pm.expect(msg).to.have.property('id');",
+                  "        pm.expect(msg).to.have.property('role');",
+                  "        pm.expect(msg).to.have.property('content');",
+                  "        pm.expect(msg).to.have.property('createdAt');",
+                  "    }",
                   "});"
                 ]
               }
@@ -1225,7 +1552,7 @@
       "name": "Companion Errors",
       "item": [
         {
-          "name": "Missing Access Token",
+          "name": "Chat - Missing Access Token",
           "request": {
             "method": "POST",
             "header": [
@@ -1266,7 +1593,7 @@
           ]
         },
         {
-          "name": "Invalid Companion Payload",
+          "name": "Chat - Empty Message",
           "request": {
             "method": "POST",
             "header": [
@@ -1301,9 +1628,474 @@
                   "    pm.expect(pm.response.code).to.eql(400);",
                   "});",
                   "",
+                  "pm.test(\"Response indicates validation failure\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Invalid companion request');",
+                  "    pm.expect(json.errors).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chat - Missing Message Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/companion/chat"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates validation failure\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Invalid companion request');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Conversation - Invalid ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/companion/conversations/invalid-id"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates invalid ID\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Invalid conversation ID');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Conversation - Not Found",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/companion/conversations/64c13ab08edf48a008793caf"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates not found\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Conversation not found');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Check-ins",
+      "item": [
+        {
+          "name": "Create Check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feeling\": \"good\",\n  \"energy\": \"high\",\n  \"focus\": \"product_work\",\n  \"note\": \"Feeling productive today, ready to tackle the main feature.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/check-ins"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains message and checkIn object\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Check-in created successfully');",
+                  "    pm.expect(json.checkIn).to.be.an('object');",
+                  "    pm.expect(json.checkIn).to.have.property('feeling');",
+                  "    pm.expect(json.checkIn).to.have.property('energy');",
+                  "    pm.expect(json.checkIn).to.have.property('focus');",
+                  "});",
+                  "",
+                  "pm.test(\"Created check-in ID is saved\", function () {",
+                  "    const json = pm.response.json();",
+                  "    const checkInId = json.checkIn._id || json.checkIn.id;",
+                  "    pm.expect(checkInId).to.be.a('string');",
+                  "    pm.collectionVariables.set('checkInId', checkInId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Check-ins",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/check-ins"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains checkIns array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.checkIns).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Today's Check-in",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/check-ins/today"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains checkIn (may be null if none today)\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('checkIn');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Check-ins Errors",
+      "item": [
+        {
+          "name": "Missing Access Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feeling\": \"good\",\n  \"energy\": \"high\",\n  \"focus\": \"product_work\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/check-ins"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(401);",
+                  "});",
+                  "",
                   "pm.test(\"Response indicates failure\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.message).to.exist;",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid Feeling Value",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feeling\": \"amazing\",\n  \"energy\": \"high\",\n  \"focus\": \"product_work\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/check-ins"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates validation failure\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Invalid check-in data');",
+                  "    pm.expect(json.errors).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Missing Required Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Only a note, missing required fields\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/check-ins"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates validation failure\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Invalid check-in data');",
+                  "    pm.expect(json.errors).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid Energy Value",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feeling\": \"good\",\n  \"energy\": \"super\",\n  \"focus\": \"product_work\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/check-ins"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates validation failure\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Invalid check-in data');",
+                  "    pm.expect(json.errors).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid Focus Value",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feeling\": \"good\",\n  \"energy\": \"high\",\n  \"focus\": \"gaming\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/check-ins"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates validation failure\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Invalid check-in data');",
+                  "    pm.expect(json.errors).to.exist;",
                   "});"
                 ]
               }
