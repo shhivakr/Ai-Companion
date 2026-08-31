@@ -2103,6 +2103,239 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Timeline",
+      "item": [
+        {
+          "name": "Get Timeline",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/timeline"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains timeline\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    pm.expect(json.timeline).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Task Timeline",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/timeline?type=task",
+              "host": ["{{baseUrl}}"],
+              "path": ["timeline"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "task"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains timeline\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    pm.expect(json.timeline).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"All timeline items are tasks\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    json.timeline.forEach((item) => {",
+                  "        pm.expect(item.type).to.eql('task');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Goal Timeline",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/timeline?type=goal",
+              "host": ["{{baseUrl}}"],
+              "path": ["timeline"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "goal"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains timeline\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    pm.expect(json.timeline).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"All timeline items are goals\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    json.timeline.forEach((item) => {",
+                  "        pm.expect(item.type).to.eql('goal');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Check-in Timeline",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/timeline?type=checkin",
+              "host": ["{{baseUrl}}"],
+              "path": ["timeline"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "checkin"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains timeline\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    pm.expect(json.timeline).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"All timeline items are check-ins\", function () {",
+                  "    const json = pm.response.json();",
+                  "",
+                  "    json.timeline.forEach((item) => {",
+                  "        pm.expect(item.type).to.eql('checkin');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Timeline Errors",
+      "item": [
+        {
+          "name": "Invalid Timeline Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/timeline?type=invalid",
+              "host": ["{{baseUrl}}"],
+              "path": ["timeline"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "invalid"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

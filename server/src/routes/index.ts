@@ -4,6 +4,7 @@ import goalRoutes from "../modules/goals/routes/goal.routes.js";
 import taskRoutes from "../modules/tasks/routes/task.routes.js";
 import companionRoutes from "../modules/companion/routes/companion.routes.js";
 import checkInRoutes from "../modules/checkins/routes/checkin.routes.js";
+import timelineRoutes from "../modules/timeline/routes/timeline.routes.js";
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use("/goals", goalRoutes);
 router.use("/tasks", taskRoutes);
 router.use("/companion", companionRoutes);
 router.use("/check-ins", checkInRoutes);
+router.use("/timeline", timelineRoutes);
 
 export default router;
