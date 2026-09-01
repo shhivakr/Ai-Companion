@@ -2692,6 +2692,192 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/settings"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains settings object\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.settings).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test(\"Settings has expected properties\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.settings).to.have.property('companionInsights');",
+                  "    pm.expect(json.settings).to.have.property('interactionStyle');",
+                  "    pm.expect(json.settings).to.have.property('memoryEnabled');",
+                  "    pm.expect(json.settings).to.have.property('notifications');",
+                  "    pm.expect(json.settings).to.have.property('theme');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companionInsights\": false,\n  \"interactionStyle\": \"concise\",\n  \"memoryEnabled\": false,\n  \"notifications\": true,\n  \"theme\": \"dark\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/settings"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains message and updated settings\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Settings updated successfully');",
+                  "    pm.expect(json.settings).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test(\"Updated settings reflect the changes\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.settings.companionInsights).to.eql(false);",
+                  "    pm.expect(json.settings.interactionStyle).to.eql('concise');",
+                  "    pm.expect(json.settings.memoryEnabled).to.eql(false);",
+                  "    pm.expect(json.settings.notifications).to.eql(true);",
+                  "    pm.expect(json.settings.theme).to.eql('dark');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Settings Errors",
+      "item": [
+        {
+          "name": "Invalid Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interactionStyle\": \"invalid\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/settings"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown Settings Field",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unknownField\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/settings"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
