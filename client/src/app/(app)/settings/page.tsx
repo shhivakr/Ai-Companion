@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -10,15 +11,71 @@ import Avatar from "@/components/ui/Avatar";
 import SettingsSection from "@/components/settings/SettingsSection";
 import SettingsRow from "@/components/settings/SettingsRow";
 import { useAuth } from "@/providers/AuthProvider";
+import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
+import type { InteractionStyle, Theme } from "@/lib/api/settings.api";
 
 export default function SettingsPage() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { setTheme: setAppTheme } = useTheme();
+
+  const {
+    data: settings,
+    isLoading: settingsLoading,
+    isError: settingsError,
+  } = useSettings();
+
+  const updateSettings = useUpdateSettings();
 
   const [companionInsights, setCompanionInsights] = useState(true);
+  const [interactionStyle, setInteractionStyle] =
+    useState<InteractionStyle>("balanced");
   const [memoryEnabled, setMemoryEnabled] = useState(true);
   const [notifications, setNotifications] = useState(true);
+  const [theme, setTheme] = useState<Theme>("system");
   const [loggingOut, setLoggingOut] = useState(false);
+
+  const setAppThemeRef = useRef(setAppTheme);
+  setAppThemeRef.current = setAppTheme;
+
+  useEffect(() => {
+    if (settings) {
+      setCompanionInsights(settings.companionInsights);
+      setInteractionStyle(settings.interactionStyle);
+      setMemoryEnabled(settings.memoryEnabled);
+      setNotifications(settings.notifications);
+      setTheme(settings.theme);
+      setAppThemeRef.current(settings.theme);
+    }
+  }, [settings]);
+
+  function handleThemeChange(value: Theme) {
+    setTheme(value);
+    setAppTheme(value);
+  }
+
+  async function handleSave() {
+    updateSettings.mutate(
+      {
+        companionInsights,
+        interactionStyle,
+        memoryEnabled,
+        notifications,
+        theme,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Settings saved successfully.");
+        },
+        onError: (error) => {
+          const message =
+            error instanceof Error ? error.message : "Unable to save settings.";
+
+          toast.error(message);
+        },
+      },
+    );
+  }
 
   async function handleLogout() {
     try {
@@ -41,6 +98,8 @@ export default function SettingsPage() {
 
   const userName = user?.name || "User";
   const userEmail = user?.email || "";
+
+  const controlsDisabled = settingsLoading || settingsError;
 
   return (
     <div className="space-y-8 py-6">
@@ -83,7 +142,12 @@ export default function SettingsPage() {
           title="Edit profile"
           description="Update your name and profile information."
         >
-          <Button variant="secondary">Edit</Button>
+          <Button
+            variant="secondary"
+            onClick={() => toast.info("Profile editing is not available yet.")}
+          >
+            Edit
+          </Button>
         </SettingsRow>
       </SettingsSection>
 
@@ -100,15 +164,16 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setCompanionInsights((value) => !value)}
+            disabled={controlsDisabled}
             className={[
-              "relative h-6 w-11 rounded-full transition-colors",
-              companionInsights ? "bg-neutral-950" : "bg-neutral-200",
+              "relative h-6 w-11 rounded-full transition-colors disabled:opacity-50",
+              companionInsights ? "bg-neutral-950 dark:bg-white" : "bg-neutral-200 dark:bg-neutral-700",
             ].join(" ")}
             aria-label="Toggle Companion insights"
           >
             <span
               className={[
-                "absolute top-1 h-4 w-4 rounded-full bg-white transition-transform",
+                "absolute top-1 h-4 w-4 rounded-full bg-white dark:bg-neutral-950 transition-transform",
                 companionInsights ? "left-6" : "left-1",
               ].join(" ")}
             />
@@ -120,8 +185,12 @@ export default function SettingsPage() {
           description="Choose how SIVRA should generally respond."
         >
           <select
-            defaultValue="balanced"
-            className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
+            value={interactionStyle}
+            onChange={(e) =>
+              setInteractionStyle(e.target.value as InteractionStyle)
+            }
+            disabled={controlsDisabled}
+            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground outline-none"
           >
             <option value="balanced">Balanced</option>
             <option value="concise">Concise</option>
@@ -143,15 +212,16 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setMemoryEnabled((value) => !value)}
+            disabled={controlsDisabled}
             className={[
-              "relative h-6 w-11 rounded-full transition-colors",
-              memoryEnabled ? "bg-neutral-950" : "bg-neutral-200",
+              "relative h-6 w-11 rounded-full transition-colors disabled:opacity-50",
+              memoryEnabled ? "bg-neutral-950 dark:bg-white" : "bg-neutral-200 dark:bg-neutral-700",
             ].join(" ")}
             aria-label="Toggle memory"
           >
             <span
               className={[
-                "absolute top-1 h-4 w-4 rounded-full bg-white transition-transform",
+                "absolute top-1 h-4 w-4 rounded-full bg-white dark:bg-neutral-950 transition-transform",
                 memoryEnabled ? "left-6" : "left-1",
               ].join(" ")}
             />
@@ -162,7 +232,9 @@ export default function SettingsPage() {
           title="Manage memories"
           description="Review, edit or remove saved memories."
         >
-          <Button variant="secondary">Manage</Button>
+          <Button variant="secondary" onClick={() => router.push("/memory")}>
+            Manage
+          </Button>
         </SettingsRow>
       </SettingsSection>
 
@@ -179,15 +251,16 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setNotifications((value) => !value)}
+            disabled={controlsDisabled}
             className={[
-              "relative h-6 w-11 rounded-full transition-colors",
-              notifications ? "bg-neutral-950" : "bg-neutral-200",
+              "relative h-6 w-11 rounded-full transition-colors disabled:opacity-50",
+              notifications ? "bg-neutral-950 dark:bg-white" : "bg-neutral-200 dark:bg-neutral-700",
             ].join(" ")}
             aria-label="Toggle notifications"
           >
             <span
               className={[
-                "absolute top-1 h-4 w-4 rounded-full bg-white transition-transform",
+                "absolute top-1 h-4 w-4 rounded-full bg-white dark:bg-neutral-950 transition-transform",
                 notifications ? "left-6" : "left-1",
               ].join(" ")}
             />
@@ -198,7 +271,14 @@ export default function SettingsPage() {
           title="Notification preferences"
           description="Choose the types of notifications you receive."
         >
-          <Button variant="secondary">Manage</Button>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              toast.info("Notification preferences are not available yet.")
+            }
+          >
+            Manage
+          </Button>
         </SettingsRow>
       </SettingsSection>
 
@@ -213,8 +293,10 @@ export default function SettingsPage() {
           description="Choose how the application should appear."
         >
           <select
-            defaultValue="system"
-            className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none"
+            value={theme}
+            onChange={(e) => handleThemeChange(e.target.value as Theme)}
+            disabled={controlsDisabled}
+            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground outline-none"
           >
             <option value="system">System</option>
             <option value="light">Light</option>
@@ -240,7 +322,11 @@ export default function SettingsPage() {
           title="Delete account"
           description="Permanently remove your account and associated data."
         >
-          <Button variant="ghost" className="text-red-600 hover:bg-red-50">
+          <Button
+            variant="ghost"
+            className="text-red-600 hover:bg-red-50"
+            onClick={() => toast.info("Account deletion is not available yet.")}
+          >
             Delete account
           </Button>
         </SettingsRow>
@@ -248,17 +334,21 @@ export default function SettingsPage() {
 
       {/* Save */}
 
-      <Card className="flex flex-col justify-between gap-4 bg-neutral-100 p-5 sm:flex-row sm:items-center">
+      <Card className="flex flex-col justify-between gap-4 bg-surface-elevated p-5 sm:flex-row sm:items-center">
         <div>
-          <p className="text-sm font-medium">Settings are currently local</p>
+          <p className="text-sm font-medium">Save your preferences</p>
 
           <p className="mt-1 text-xs text-neutral-500">
-            These controls will be connected to your account after the UI
-            implementation is complete.
+            Click save to persist your settings to your account.
           </p>
         </div>
 
-        <Button>Save changes</Button>
+        <Button
+          onClick={handleSave}
+          disabled={controlsDisabled || updateSettings.isPending}
+        >
+          {updateSettings.isPending ? "Saving..." : "Save changes"}
+        </Button>
       </Card>
     </div>
   );

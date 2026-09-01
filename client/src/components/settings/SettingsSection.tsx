@@ -21,7 +21,7 @@ export default function SettingsSection({
         )}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
         {children}
       </div>
     </section>

@@ -10,7 +10,7 @@ export default function SettingsRow({
   children,
 }: SettingsRowProps) {
   return (
-    <div className="flex flex-col gap-4 border-b border-neutral-100 p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-4 border-b border-border p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <p className="text-sm font-medium">{title}</p>
 
