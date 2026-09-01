@@ -134,13 +134,13 @@ export default function CheckinsPage() {
       {/* Header */}
 
       <section>
-        <p className="text-sm text-neutral-500">Reflection</p>
+        <p className="text-sm text-foreground-secondary">Reflection</p>
 
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
           Check-in
         </h1>
 
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
           Take a moment to capture where you are right now.
         </p>
       </section>
@@ -148,27 +148,27 @@ export default function CheckinsPage() {
       {/* Today's Check-in */}
 
       {todayCheckIn && (
-        <Card className="border-neutral-200 bg-neutral-50 p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+        <Card className="border-border bg-surface-elevated p-5">
+          <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
             Today's check-in
           </p>
 
           <div className="mt-3 flex flex-wrap gap-2 text-sm">
-            <span className="rounded-full border border-neutral-200 bg-white px-3 py-1.5">
+            <span className="rounded-full border border-border bg-surface px-3 py-1.5">
               Feeling · {formatLabel(todayCheckIn.feeling)}
             </span>
 
-            <span className="rounded-full border border-neutral-200 bg-white px-3 py-1.5">
+            <span className="rounded-full border border-border bg-surface px-3 py-1.5">
               Energy · {formatLabel(todayCheckIn.energy)}
             </span>
 
-            <span className="rounded-full border border-neutral-200 bg-white px-3 py-1.5">
+            <span className="rounded-full border border-border bg-surface px-3 py-1.5">
               Focus · {formatLabel(todayCheckIn.focus)}
             </span>
           </div>
 
           {todayCheckIn.note && (
-            <p className="mt-4 text-sm leading-6 text-neutral-600">
+            <p className="mt-4 text-sm leading-6 text-foreground-secondary">
               {todayCheckIn.note}
             </p>
           )}
@@ -195,7 +195,7 @@ export default function CheckinsPage() {
 
           <section>
             <div className="mb-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                 01
               </p>
 
@@ -203,7 +203,7 @@ export default function CheckinsPage() {
                 How are you feeling?
               </h2>
 
-              <p className="mt-1 text-sm text-neutral-500">
+              <p className="mt-1 text-sm text-foreground-secondary">
                 Choose what feels closest right now.
               </p>
             </div>
@@ -223,9 +223,9 @@ export default function CheckinsPage() {
 
           {/* Energy */}
 
-          <section className="border-t border-neutral-100 pt-8">
+          <section className="border-t border-border pt-8">
             <div className="mb-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                 02
               </p>
 
@@ -249,9 +249,9 @@ export default function CheckinsPage() {
 
           {/* Focus */}
 
-          <section className="border-t border-neutral-100 pt-8">
+          <section className="border-t border-border pt-8">
             <div className="mb-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                 03
               </p>
 
@@ -274,9 +274,9 @@ export default function CheckinsPage() {
 
           {/* Note */}
 
-          <section className="border-t border-neutral-100 pt-8">
+          <section className="border-t border-border pt-8">
             <div className="mb-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                 04 · Optional
               </p>
 
@@ -291,15 +291,15 @@ export default function CheckinsPage() {
               onChange={(event) => setNote(event.target.value)}
               maxLength={1000}
               placeholder="Write a short note..."
-              className="w-full resize-none rounded-xl border border-neutral-200 p-4 text-sm outline-none placeholder:text-neutral-400 focus:border-neutral-400"
+              className="w-full resize-none rounded-xl border border-border p-4 text-sm outline-none placeholder:text-foreground-muted focus:border-foreground-muted"
             />
 
-            <p className="mt-2 text-right text-xs text-neutral-400">
+            <p className="mt-2 text-right text-xs text-foreground-muted">
               {note.length}/1000
             </p>
           </section>
 
-          <div className="flex justify-end border-t border-neutral-100 pt-6">
+          <div className="flex justify-end border-t border-border pt-6">
             <Button
               onClick={handleSubmit}
               disabled={!feeling || !energy || !focus || isCreating}
@@ -314,7 +314,7 @@ export default function CheckinsPage() {
 
       <section>
         <div className="mb-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
             History
           </p>
 
@@ -323,7 +323,7 @@ export default function CheckinsPage() {
 
         <div className="space-y-3">
           {isLoading ? (
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-foreground-secondary">
               Loading your check-ins...
             </p>
           ) : checkIns.length > 0 ? (
@@ -337,15 +337,15 @@ export default function CheckinsPage() {
               />
             ))
           ) : (
-            <p className="text-sm text-neutral-500">No check-ins yet.</p>
+            <p className="text-sm text-foreground-secondary">No check-ins yet.</p>
           )}
         </div>
       </section>
 
       {/* Companion */}
 
-      <section className="rounded-2xl border border-neutral-200 bg-neutral-100 p-6">
-        <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <section className="rounded-2xl border border-border bg-surface-elevated p-6">
+        <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
           Companion
         </p>
 
@@ -353,7 +353,7 @@ export default function CheckinsPage() {
           Your check-ins help me understand your patterns.
         </h2>
 
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
           Over time, these small reflections can help surface useful patterns
           around your energy, focus and progress.
         </p>

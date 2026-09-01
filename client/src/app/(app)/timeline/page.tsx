@@ -82,13 +82,13 @@ export default function TimelinePage() {
       {/* Header */}
 
       <section>
-        <p className="text-sm text-neutral-500">Your journey</p>
+        <p className="text-sm text-foreground-secondary">Your journey</p>
 
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
           Timeline
         </h1>
 
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
           A chronological view of the things you've done, noticed and moved
           forward.
         </p>
@@ -96,7 +96,7 @@ export default function TimelinePage() {
 
       {/* Filters */}
 
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-neutral-200">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border">
         {filters.map((filter) => {
           const isActive = activeFilter === filter.value;
 
@@ -108,8 +108,8 @@ export default function TimelinePage() {
               className={[
                 "shrink-0 px-3 py-3 text-sm transition-colors",
                 isActive
-                  ? "border-b-2 border-neutral-950 font-medium text-neutral-950"
-                  : "text-neutral-500 hover:text-neutral-950",
+                  ? "border-b-2 border-foreground font-medium text-foreground"
+                  : "text-foreground-secondary hover:text-foreground",
               ].join(" ")}
             >
               {filter.label}
@@ -122,7 +122,7 @@ export default function TimelinePage() {
 
       {isLoading && (
         <Card className="p-6">
-          <p className="text-sm text-neutral-500">Loading your timeline...</p>
+          <p className="text-sm text-foreground-secondary">Loading your timeline...</p>
         </Card>
       )}
 
@@ -149,7 +149,7 @@ export default function TimelinePage() {
             return (
               <section key={groupDate.toDateString()}>
                 <div className="mb-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                     {formatDate(group.date)}
                   </p>
 
@@ -182,7 +182,7 @@ export default function TimelinePage() {
           <div className="max-w-md">
             <p className="text-sm font-medium">No activity yet</p>
 
-            <p className="mt-2 text-sm leading-6 text-neutral-500">
+            <p className="mt-2 text-sm leading-6 text-foreground-secondary">
               Your goals, tasks and check-ins will appear here as you use SIVRA.
             </p>
           </div>
@@ -192,13 +192,13 @@ export default function TimelinePage() {
       {/* Refresh indicator */}
 
       {!isLoading && isFetching && (
-        <p className="text-xs text-neutral-400">Updating timeline...</p>
+        <p className="text-xs text-foreground-muted">Updating timeline...</p>
       )}
 
       {/* Companion Insight */}
 
-      <section className="rounded-2xl border border-neutral-200 bg-neutral-100 p-6">
-        <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <section className="rounded-2xl border border-border bg-surface-elevated p-6">
+        <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
           Companion perspective
         </p>
 
@@ -206,7 +206,7 @@ export default function TimelinePage() {
           Your activity tells a story.
         </h2>
 
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
           Over time, your timeline can help reveal patterns in how you work,
           reflect and move toward your goals.
         </p>

@@ -21,24 +21,24 @@ export default function TimelineItem({
   return (
     <div className="relative flex gap-4">
       <div className="flex flex-col items-center">
-        <div className="mt-1 h-2.5 w-2.5 rounded-full bg-neutral-900" />
-        <div className="mt-2 w-px flex-1 bg-neutral-200" />
+        <div className="mt-1 h-2.5 w-2.5 rounded-full bg-foreground" />
+        <div className="mt-2 w-px flex-1 bg-border" />
       </div>
 
       <div className="min-w-0 flex-1 pb-7">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-xs text-neutral-500">{time}</p>
+          <p className="text-xs text-foreground-secondary">{time}</p>
 
-          <span className="text-neutral-300">·</span>
+          <span className="text-foreground-muted">·</span>
 
-          <p className="text-xs font-medium text-neutral-500">
+          <p className="text-xs font-medium text-foreground-secondary">
             {typeLabels[type]}
           </p>
         </div>
 
         <h3 className="mt-1 text-sm font-medium">{title}</h3>
 
-        <p className="mt-1 text-sm leading-6 text-neutral-600">{description}</p>
+        <p className="mt-1 text-sm leading-6 text-foreground-secondary">{description}</p>
       </div>
     </div>
   );

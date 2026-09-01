@@ -45,21 +45,21 @@ export default function GoalDeleteDialog({
       aria-modal="true"
       aria-labelledby="delete-goal-title"
     >
-      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
         <h2
           id="delete-goal-title"
-          className="text-lg font-semibold text-neutral-950"
+          className="text-lg font-semibold text-foreground"
         >
           Delete this goal?
         </h2>
 
-        <p className="mt-2 text-sm leading-6 text-neutral-500">
+        <p className="mt-2 text-sm leading-6 text-foreground-secondary">
           This will permanently remove the goal and its associated progress.
           This action cannot be undone.
         </p>
 
         {deleteGoalMutation.isError && (
-          <p className="mt-4 text-sm text-red-600">
+          <p className="mt-4 text-sm text-red-600 dark:text-red-400">
             {deleteGoalMutation.error instanceof Error
               ? deleteGoalMutation.error.message
               : "Unable to delete goal."}
@@ -79,7 +79,7 @@ export default function GoalDeleteDialog({
           <Button
             type="button"
             variant="ghost"
-            className="text-red-600 hover:bg-red-50"
+            className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
             onClick={handleDelete}
             disabled={deleteGoalMutation.isPending}
           >

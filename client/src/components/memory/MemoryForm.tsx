@@ -17,7 +17,7 @@ interface MemoryFormProps {
 }
 
 const inputClassName =
-  "mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100";
+  "mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted focus:border-foreground-muted focus:ring-2 focus:ring-foreground-muted/20";
 
 export default function MemoryForm({ onSuccess, onCancel }: MemoryFormProps) {
   const createMemoryMutation = useCreateMemory();
@@ -62,7 +62,7 @@ export default function MemoryForm({ onSuccess, onCancel }: MemoryFormProps) {
       <div>
         <label
           htmlFor="memory-title"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Memory title
         </label>
@@ -82,7 +82,7 @@ export default function MemoryForm({ onSuccess, onCancel }: MemoryFormProps) {
       <div>
         <label
           htmlFor="memory-content"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Content
         </label>
@@ -105,7 +105,7 @@ export default function MemoryForm({ onSuccess, onCancel }: MemoryFormProps) {
       <div>
         <label
           htmlFor="memory-category"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Category
         </label>
@@ -131,7 +131,7 @@ export default function MemoryForm({ onSuccess, onCancel }: MemoryFormProps) {
       <div>
         <label
           htmlFor="memory-importance"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Importance
         </label>
@@ -165,7 +165,7 @@ export default function MemoryForm({ onSuccess, onCancel }: MemoryFormProps) {
         </p>
       )}
 
-      <div className="flex justify-end gap-3 border-t border-neutral-100 pt-5">
+      <div className="flex justify-end gap-3 border-t border-border pt-5">
         {onCancel && (
           <Button
             type="button"

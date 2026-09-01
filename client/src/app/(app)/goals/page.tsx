@@ -56,13 +56,13 @@ export default function GoalsPage() {
 
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <section>
-          <p className="text-sm text-neutral-500">Direction</p>
+          <p className="text-sm text-foreground-secondary">Direction</p>
 
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
             Goals
           </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
             What you are moving toward, and what matters next.
           </p>
         </section>
@@ -74,7 +74,7 @@ export default function GoalsPage() {
 
       {/* ================================ Filters ================================ */}
 
-      <div className="flex flex-wrap items-center gap-1 border-b border-neutral-200">
+      <div className="flex flex-wrap items-center gap-1 border-b border-border">
         {filters.map((filter) => {
           const isActive = statusFilter === filter.value;
 
@@ -86,8 +86,8 @@ export default function GoalsPage() {
               className={[
                 "rounded-t-lg px-3 py-3 text-sm transition-colors",
                 isActive
-                  ? "border-b-2 border-neutral-950 font-medium text-neutral-950"
-                  : "text-neutral-500 hover:text-neutral-950",
+                  ? "border-b-2 border-foreground font-medium text-foreground"
+                  : "text-foreground-secondary hover:text-foreground",
               ].join(" ")}
             >
               {filter.label}
@@ -105,20 +105,20 @@ export default function GoalsPage() {
             <GoalSkeleton />
           </>
         ) : isError ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 lg:col-span-2">
-            <p className="text-sm text-red-600">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 lg:col-span-2 dark:border-red-900/50 dark:bg-red-900/20">
+            <p className="text-sm text-red-600 dark:text-red-400">
               {error instanceof Error ? error.message : "Unable to load goals."}
             </p>
           </div>
         ) : filteredGoals.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 lg:col-span-2">
+          <div className="rounded-2xl border border-dashed border-border bg-surface p-8 lg:col-span-2">
             <p className="text-sm font-medium">
               {statusFilter === "all"
                 ? "No goals yet."
                 : `No ${statusFilter} goals.`}
             </p>
 
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-foreground-secondary">
               {statusFilter === "all"
                 ? "Create your first goal to give Companion something meaningful to work with."
                 : "Goals with this status will appear here."}
@@ -141,8 +141,8 @@ export default function GoalsPage() {
 
       {/* ================================ Companion Context ================================ */}
 
-      <section className="rounded-2xl border border-neutral-200 bg-neutral-100 p-6">
-        <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <section className="rounded-2xl border border-border bg-surface-elevated p-6">
+        <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
           Companion perspective
         </p>
 
@@ -150,7 +150,7 @@ export default function GoalsPage() {
           Your product goal is currently getting the most momentum.
         </h2>
 
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
           Finishing the current UI milestone could unlock the next stage of
           development.
         </p>
@@ -179,14 +179,14 @@ export default function GoalsPage() {
 
 function GoalSkeleton() {
   return (
-    <div className="animate-pulse rounded-2xl border border-neutral-200 bg-white p-6">
-      <div className="h-4 w-20 rounded bg-neutral-100" />
-      <div className="mt-4 h-6 w-2/3 rounded bg-neutral-100" />
-      <div className="mt-3 h-4 w-full rounded bg-neutral-100" />
-      <div className="mt-2 h-4 w-4/5 rounded bg-neutral-100" />
-      <div className="mt-6 h-1.5 w-full rounded bg-neutral-100" />
-      <div className="mt-6 h-4 w-32 rounded bg-neutral-100" />
-      <div className="mt-5 h-9 w-24 rounded-lg bg-neutral-100" />
+    <div className="animate-pulse rounded-2xl border border-border bg-surface p-6">
+      <div className="h-4 w-20 rounded bg-neutral-100 dark:bg-neutral-800" />
+      <div className="mt-4 h-6 w-2/3 rounded bg-neutral-100 dark:bg-neutral-800" />
+      <div className="mt-3 h-4 w-full rounded bg-neutral-100 dark:bg-neutral-800" />
+      <div className="mt-2 h-4 w-4/5 rounded bg-neutral-100 dark:bg-neutral-800" />
+      <div className="mt-6 h-1.5 w-full rounded bg-neutral-100 dark:bg-neutral-800" />
+      <div className="mt-6 h-4 w-32 rounded bg-neutral-100 dark:bg-neutral-800" />
+      <div className="mt-5 h-9 w-24 rounded-lg bg-neutral-100 dark:bg-neutral-800" />
     </div>
   );
 }

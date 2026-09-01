@@ -26,7 +26,7 @@ export default function MemoryModal({
         }
       }}
     >
-      <div className="w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-950 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
+      <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 text-foreground shadow-xl">
         {children}
       </div>
     </div>

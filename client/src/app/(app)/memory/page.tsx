@@ -115,13 +115,13 @@ export default function MemoryPage() {
 
       <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm text-neutral-500">Context</p>
+          <p className="text-sm text-foreground-secondary">Context</p>
 
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
             Memory
           </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
             Important context that helps Companion understand you over time.
           </p>
         </div>
@@ -133,8 +133,8 @@ export default function MemoryPage() {
 
       {/* Memory explanation */}
 
-      <Card className="bg-neutral-100 p-6">
-        <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <Card className="bg-surface-elevated p-6">
+        <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
           About memory
         </p>
 
@@ -142,7 +142,7 @@ export default function MemoryPage() {
           You stay in control of what Companion remembers.
         </h2>
 
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
           Memories can come from conversations, check-ins, goals and other
           interactions. You can review, edit or remove them whenever you want.
         </p>
@@ -150,7 +150,7 @@ export default function MemoryPage() {
 
       {/* Filters */}
 
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-neutral-200">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border">
         {categories.map((item) => {
           const isActive = selectedCategory === item.value;
 
@@ -162,8 +162,8 @@ export default function MemoryPage() {
               className={[
                 "shrink-0 px-3 py-3 text-sm",
                 isActive
-                  ? "border-b-2 border-neutral-950 font-medium text-neutral-950"
-                  : "text-neutral-500",
+                  ? "border-b-2 border-foreground font-medium text-foreground"
+                  : "text-foreground-secondary",
               ].join(" ")}
             >
               {item.label}
@@ -177,7 +177,7 @@ export default function MemoryPage() {
       {memoriesQuery.isLoading && (
         <section className="grid gap-5 lg:grid-cols-2">
           <Card className="p-6">
-            <p className="text-sm text-neutral-500">Loading memories...</p>
+            <p className="text-sm text-foreground-secondary">Loading memories...</p>
           </Card>
         </section>
       )}
@@ -199,7 +199,7 @@ export default function MemoryPage() {
             <Card className="p-6">
               <h3 className="font-semibold">No memories found</h3>
 
-              <p className="mt-2 text-sm leading-6 text-neutral-500">
+              <p className="mt-2 text-sm leading-6 text-foreground-secondary">
                 Add something you want Companion to remember.
               </p>
             </Card>
@@ -232,12 +232,12 @@ export default function MemoryPage() {
 
       {/* Privacy / control */}
 
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+      <section className="rounded-2xl border border-border bg-surface p-6">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
           <div>
             <p className="text-sm font-medium">Memory controls</p>
 
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-neutral-500">
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-foreground-secondary">
               Manage what Companion can remember and how your context is used.
             </p>
           </div>

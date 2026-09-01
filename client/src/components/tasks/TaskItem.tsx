@@ -65,14 +65,14 @@ export default function TaskItem({
         onClick={() => onToggle?.(task)}
         className={[
           "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border outline-none transition",
-          "focus-visible:ring-2 focus-visible:ring-neutral-300 focus-visible:ring-offset-2",
+          "focus-visible:ring-2 focus-visible:ring-foreground-muted/40 focus-visible:ring-offset-2",
           completed
-            ? "border-neutral-950 bg-neutral-950"
-            : "border-neutral-300 hover:border-neutral-900",
+            ? "border-foreground bg-foreground"
+            : "border-border hover:border-foreground",
         ].join(" ")}
       >
         {completed && (
-          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-white" />
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-surface" />
         )}
       </button>
 
@@ -82,7 +82,7 @@ export default function TaskItem({
         <p
           className={[
             "break-words text-sm font-medium",
-            completed ? "text-neutral-400 line-through" : "text-neutral-950",
+            completed ? "text-foreground-muted line-through" : "text-foreground",
           ].join(" ")}
         >
           {task.title}
@@ -92,7 +92,7 @@ export default function TaskItem({
           <p
             className={[
               "mt-1 line-clamp-2 text-xs leading-5",
-              completed ? "text-neutral-400" : "text-neutral-500",
+              completed ? "text-foreground-muted" : "text-foreground-secondary",
             ].join(" ")}
           >
             {task.description}
@@ -102,18 +102,18 @@ export default function TaskItem({
         {(goalTitle || due) && (
           <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
             {goalTitle && (
-              <span className="max-w-full truncate text-xs text-neutral-500">
+              <span className="max-w-full truncate text-xs text-foreground-secondary">
                 {goalTitle}
               </span>
             )}
 
             {goalTitle && due && (
-              <span aria-hidden="true" className="text-neutral-300">
+              <span aria-hidden="true" className="text-foreground-muted">
                 ·
               </span>
             )}
 
-            {due && <span className="text-xs text-neutral-500">{due}</span>}
+            {due && <span className="text-xs text-foreground-secondary">{due}</span>}
           </div>
         )}
       </div>
@@ -141,7 +141,7 @@ export default function TaskItem({
             type="button"
             onClick={() => onEdit(task)}
             aria-label={`Edit "${task.title}"`}
-            className="rounded-md px-2 py-1.5 text-xs text-neutral-500 outline-none transition-colors hover:bg-neutral-100 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-neutral-300"
+            className="rounded-md px-2 py-1.5 text-xs text-foreground-secondary outline-none transition-colors hover:bg-surface-elevated hover:text-foreground focus-visible:ring-2 focus-visible:ring-foreground-muted/40"
           >
             Edit
           </button>

@@ -19,7 +19,7 @@ interface TaskFormProps {
 }
 
 const inputClassName =
-  "mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100";
+  "mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted focus:border-foreground-muted focus:ring-2 focus:ring-foreground-muted/20";
 
 export default function TaskForm({ task, onSuccess, onCancel }: TaskFormProps) {
   const isEditing = Boolean(task);
@@ -163,11 +163,11 @@ export default function TaskForm({ task, onSuccess, onCancel }: TaskFormProps) {
         </select>
 
         {goalsLoading && (
-          <p className="mt-1.5 text-xs text-neutral-400">Loading goals...</p>
+          <p className="mt-1.5 text-xs text-foreground-muted">Loading goals...</p>
         )}
 
         {!goalsLoading && goals.length === 0 && (
-          <p className="mt-1.5 text-xs text-neutral-400">
+          <p className="mt-1.5 text-xs text-foreground-muted">
             No goals available. You can create the task without a goal.
           </p>
         )}
@@ -243,7 +243,7 @@ export default function TaskForm({ task, onSuccess, onCancel }: TaskFormProps) {
 
       {/* Actions */}
 
-      <div className="flex justify-end gap-3 border-t border-neutral-100 pt-5">
+      <div className="flex justify-end gap-3 border-t border-border pt-5">
         {onCancel && (
           <Button
             type="button"

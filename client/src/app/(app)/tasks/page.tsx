@@ -223,13 +223,13 @@ export default function TasksPage() {
 
       <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm text-neutral-500">Execution</p>
+          <p className="text-sm text-foreground-secondary">Execution</p>
 
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
             Tasks
           </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
             Turn your priorities into small, actionable steps.
           </p>
         </div>
@@ -253,7 +253,7 @@ export default function TasksPage() {
               }
             }}
             placeholder="What needs to be done?"
-            className="h-11 min-w-0 flex-1 rounded-lg border border-neutral-200 px-3 text-sm outline-none placeholder:text-neutral-400 focus:border-neutral-400"
+            className="h-11 min-w-0 flex-1 rounded-lg border border-border px-3 text-sm outline-none placeholder:text-foreground-muted focus:border-foreground-muted"
             disabled={createTaskMutation.isPending}
           />
 
@@ -269,7 +269,7 @@ export default function TasksPage() {
 
       {/* ================================ Filters ================================ */}
 
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-neutral-200">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border">
         {filters.map((item) => {
           const active = filter === item.value;
 
@@ -281,8 +281,8 @@ export default function TasksPage() {
               className={[
                 "shrink-0 px-3 py-3 text-sm transition-colors",
                 active
-                  ? "border-b-2 border-neutral-950 font-medium text-neutral-950"
-                  : "text-neutral-500 hover:text-neutral-950",
+                  ? "border-b-2 border-foreground font-medium text-foreground"
+                  : "text-foreground-secondary hover:text-foreground",
               ].join(" ")}
             >
               {item.label}
@@ -316,7 +316,7 @@ export default function TasksPage() {
         <section>
           <div className="mb-3 flex items-end justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
                 {filter === "today"
                   ? "Today"
                   : filter === "upcoming"
@@ -333,7 +333,7 @@ export default function TasksPage() {
               </h2>
             </div>
 
-            <span className="text-xs text-neutral-500">
+            <span className="text-xs text-foreground-secondary">
               {filteredTasks.length}{" "}
               {filteredTasks.length === 1 ? "task" : "tasks"}
             </span>
@@ -419,8 +419,8 @@ export default function TasksPage() {
 
       {/* ================================ Companion Perspective ================================ */}
 
-      <section className="rounded-2xl border border-neutral-200 bg-neutral-100 p-6">
-        <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <section className="rounded-2xl border border-border bg-surface-elevated p-6">
+        <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
           Companion perspective
         </p>
 
@@ -428,7 +428,7 @@ export default function TasksPage() {
           Keep today's list smaller than your ambition.
         </h2>
 
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">
           Your highest-priority task is connected to your main product goal.
           Finishing it could create more momentum than starting another task.
         </p>
@@ -490,14 +490,14 @@ function TaskSection({
     <section>
       <div className="mb-3 flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-foreground-secondary">
             {label}
           </p>
 
           <h2 className="mt-1 text-xl font-semibold">{title}</h2>
         </div>
 
-        <span className="text-xs text-neutral-500">
+        <span className="text-xs text-foreground-secondary">
           {count} {count === 1 ? "task" : "tasks"}
         </span>
       </div>
@@ -526,9 +526,9 @@ function TaskList({
     return (
       <Card className="px-5">
         <div className="py-8 text-center">
-          <p className="text-sm font-medium text-neutral-700">{emptyMessage}</p>
+          <p className="text-sm font-medium text-foreground-secondary">{emptyMessage}</p>
 
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-foreground-secondary">
             Add a task when you're ready.
           </p>
         </div>
@@ -538,7 +538,7 @@ function TaskList({
 
   return (
     <Card className="px-5">
-      <div className="divide-y divide-neutral-100">
+      <div className="divide-y divide-border">
         {tasks.map((task) => (
           <TaskItem
             key={task._id}
@@ -559,21 +559,21 @@ function TaskSectionSkeleton() {
   return (
     <section>
       <div className="mb-3">
-        <div className="h-3 w-16 animate-pulse rounded bg-neutral-100" />
+        <div className="h-3 w-16 animate-pulse rounded bg-surface-elevated" />
 
-        <div className="mt-2 h-6 w-32 animate-pulse rounded bg-neutral-100" />
+        <div className="mt-2 h-6 w-32 animate-pulse rounded bg-surface-elevated" />
       </div>
 
       <Card className="px-5">
-        <div className="divide-y divide-neutral-100">
+        <div className="divide-y divide-border">
           {[1, 2, 3].map((item) => (
             <div key={item} className="flex items-center gap-4 py-4">
-              <div className="h-5 w-5 animate-pulse rounded bg-neutral-100" />
+              <div className="h-5 w-5 animate-pulse rounded bg-surface-elevated" />
 
               <div className="flex-1">
-                <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-100" />
+                <div className="h-4 w-2/3 animate-pulse rounded bg-surface-elevated" />
 
-                <div className="mt-2 h-3 w-1/3 animate-pulse rounded bg-neutral-100" />
+                <div className="mt-2 h-3 w-1/3 animate-pulse rounded bg-surface-elevated" />
               </div>
             </div>
           ))}

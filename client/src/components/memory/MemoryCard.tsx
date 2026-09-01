@@ -24,21 +24,21 @@ export default function MemoryCard({
   deleting = false,
 }: MemoryCardProps) {
   return (
-    <article className="rounded-2xl border border-neutral-200 bg-white p-6">
+    <article className="rounded-2xl border border-border bg-surface p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h3 className="font-semibold">{title}</h3>
 
-          <p className="mt-2 text-sm leading-6 text-neutral-600">{content}</p>
+          <p className="mt-2 text-sm leading-6 text-foreground-secondary">{content}</p>
         </div>
 
-        <span className="shrink-0 rounded-full bg-neutral-100 px-2.5 py-1 text-xs text-neutral-500">
+        <span className="shrink-0 rounded-full bg-surface-elevated px-2.5 py-1 text-xs text-foreground-secondary">
           {category}
         </span>
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-4 border-t border-neutral-100 pt-4">
-        <div className="text-xs text-neutral-500">
+      <div className="mt-5 flex items-center justify-between gap-4 border-t border-border pt-4">
+        <div className="text-xs text-foreground-secondary">
           <span>{source}</span>
           <span className="mx-2">·</span>
           <span>{updatedAt}</span>

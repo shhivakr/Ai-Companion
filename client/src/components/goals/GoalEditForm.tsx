@@ -21,7 +21,7 @@ interface GoalEditFormProps {
 }
 
 const inputClassName =
-  "mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100";
+  "mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted focus:border-foreground-muted focus:ring-2 focus:ring-foreground-muted/20";
 
 export default function GoalEditForm({
   goal,
@@ -88,7 +88,7 @@ export default function GoalEditForm({
       <div>
         <label
           htmlFor="edit-goal-title"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Goal title
         </label>
@@ -102,7 +102,7 @@ export default function GoalEditForm({
         />
 
         {errors.title && (
-          <p className="mt-1.5 text-xs text-red-600">{errors.title.message}</p>
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{errors.title.message}</p>
         )}
       </div>
 
@@ -111,7 +111,7 @@ export default function GoalEditForm({
       <div>
         <label
           htmlFor="edit-goal-description"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Description
         </label>
@@ -125,7 +125,7 @@ export default function GoalEditForm({
         />
 
         {errors.description && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.description.message}
           </p>
         )}
@@ -137,7 +137,7 @@ export default function GoalEditForm({
         <div>
           <label
             htmlFor="edit-goal-category"
-            className="text-sm font-medium text-neutral-900"
+            className="text-sm font-medium text-foreground"
           >
             Category
           </label>
@@ -151,7 +151,7 @@ export default function GoalEditForm({
           />
 
           {errors.category && (
-            <p className="mt-1.5 text-xs text-red-600">
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
               {errors.category.message}
             </p>
           )}
@@ -160,7 +160,7 @@ export default function GoalEditForm({
         <div>
           <label
             htmlFor="edit-goal-status"
-            className="text-sm font-medium text-neutral-900"
+            className="text-sm font-medium text-foreground"
           >
             Status
           </label>
@@ -179,7 +179,7 @@ export default function GoalEditForm({
           </select>
 
           {errors.status && (
-            <p className="mt-1.5 text-xs text-red-600">
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
               {errors.status.message}
             </p>
           )}
@@ -192,12 +192,12 @@ export default function GoalEditForm({
         <div className="flex items-center justify-between">
           <label
             htmlFor="edit-goal-progress"
-            className="text-sm font-medium text-neutral-900"
+            className="text-sm font-medium text-foreground"
           >
             Progress
           </label>
 
-          <span className="text-sm font-medium text-neutral-500">
+          <span className="text-sm font-medium text-foreground-secondary">
             {progress ?? 0}%
           </span>
         </div>
@@ -212,17 +212,17 @@ export default function GoalEditForm({
             valueAsNumber: true,
           })}
           disabled={isSaving}
-          className="mt-3 w-full accent-neutral-900"
+          className="mt-3 w-full accent-foreground"
         />
 
-        <div className="mt-1 flex justify-between text-[11px] text-neutral-400">
+        <div className="mt-1 flex justify-between text-[11px] text-foreground-muted">
           <span>0%</span>
           <span>50%</span>
           <span>100%</span>
         </div>
 
         {errors.progress && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.progress.message}
           </p>
         )}
@@ -233,7 +233,7 @@ export default function GoalEditForm({
       <div>
         <label
           htmlFor="edit-goal-milestone"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Milestone
         </label>
@@ -247,7 +247,7 @@ export default function GoalEditForm({
         />
 
         {errors.milestone && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.milestone.message}
           </p>
         )}
@@ -258,7 +258,7 @@ export default function GoalEditForm({
       <div>
         <label
           htmlFor="edit-goal-next-action"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Next action
         </label>
@@ -272,7 +272,7 @@ export default function GoalEditForm({
         />
 
         {errors.nextAction && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.nextAction.message}
           </p>
         )}
@@ -283,7 +283,7 @@ export default function GoalEditForm({
       <div>
         <label
           htmlFor="edit-goal-target-date"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Target date
         </label>
@@ -297,7 +297,7 @@ export default function GoalEditForm({
         />
 
         {errors.targetDate && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.targetDate.message}
           </p>
         )}
@@ -306,8 +306,8 @@ export default function GoalEditForm({
       {/* API Error */}
 
       {updateGoalMutation.isError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
-          <p className="text-sm text-red-600">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 dark:border-red-900/50 dark:bg-red-900/20">
+          <p className="text-sm text-red-600 dark:text-red-400">
             {updateGoalMutation.error instanceof Error
               ? updateGoalMutation.error.message
               : "Unable to update goal."}
@@ -317,7 +317,7 @@ export default function GoalEditForm({
 
       {/* Actions */}
 
-      <div className="flex justify-end gap-3 border-t border-neutral-100 pt-5">
+      <div className="flex justify-end gap-3 border-t border-border pt-5">
         <Button
           type="button"
           variant="secondary"

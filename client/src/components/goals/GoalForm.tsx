@@ -16,7 +16,7 @@ interface GoalFormProps {
 }
 
 const inputClassName =
-  "mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100";
+  "mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted focus:border-foreground-muted focus:ring-2 focus:ring-foreground-muted/20";
 
 export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
   const createGoalMutation = useCreateGoal();
@@ -64,7 +64,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
       <div>
         <label
           htmlFor="goal-title"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Goal title
         </label>
@@ -77,14 +77,14 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
         />
 
         {errors.title && (
-          <p className="mt-1.5 text-xs text-red-600">{errors.title.message}</p>
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{errors.title.message}</p>
         )}
       </div>
 
       <div>
         <label
           htmlFor="goal-description"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Description
         </label>
@@ -98,7 +98,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
         />
 
         {errors.description && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.description.message}
           </p>
         )}
@@ -107,7 +107,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
       <div>
         <label
           htmlFor="goal-category"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Category
         </label>
@@ -120,7 +120,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
         />
 
         {errors.category && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.category.message}
           </p>
         )}
@@ -129,7 +129,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
       <div>
         <label
           htmlFor="goal-milestone"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Milestone
         </label>
@@ -142,7 +142,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
         />
 
         {errors.milestone && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.milestone.message}
           </p>
         )}
@@ -151,7 +151,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
       <div>
         <label
           htmlFor="goal-next-action"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Next action
         </label>
@@ -164,7 +164,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
         />
 
         {errors.nextAction && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.nextAction.message}
           </p>
         )}
@@ -173,7 +173,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
       <div>
         <label
           htmlFor="goal-target-date"
-          className="text-sm font-medium text-neutral-900"
+          className="text-sm font-medium text-foreground"
         >
           Target date
         </label>
@@ -186,21 +186,21 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
         />
 
         {errors.targetDate && (
-          <p className="mt-1.5 text-xs text-red-600">
+          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
             {errors.targetDate.message}
           </p>
         )}
       </div>
 
       {createGoalMutation.isError && (
-        <p className="text-sm text-red-600">
+        <p className="text-sm text-red-600 dark:text-red-400">
           {createGoalMutation.error instanceof Error
             ? createGoalMutation.error.message
             : "Unable to create goal."}
         </p>
       )}
 
-      <div className="flex justify-end gap-3 border-t border-neutral-100 pt-5">
+      <div className="flex justify-end gap-3 border-t border-border pt-5">
         {onCancel && (
           <Button
             type="button"

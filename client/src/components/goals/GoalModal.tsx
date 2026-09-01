@@ -24,12 +24,12 @@ export default function GoalModal({ open, onClose, children }: GoalModalProps) {
         }
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-neutral-200 bg-white shadow-xl">
-        <div className="flex items-start justify-between border-b border-neutral-100 px-6 py-5">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface shadow-xl">
+        <div className="flex items-start justify-between border-b border-border px-6 py-5">
           <div>
             <h2 className="text-lg font-semibold">Create a goal</h2>
 
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-foreground-secondary">
               Give your goal enough context for Companion to understand it.
             </p>
           </div>
@@ -37,7 +37,7 @@ export default function GoalModal({ open, onClose, children }: GoalModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
             aria-label="Close"
           >
             ×
