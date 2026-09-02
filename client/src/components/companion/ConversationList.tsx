@@ -71,8 +71,8 @@ export default function ConversationList({
             type="button"
             onClick={() => onSelect(conversation.conversationId)}
             className={[
-              "w-full rounded-lg px-3 py-2.5 text-left transition-colors",
-              active ? "bg-surface-elevated" : "hover:bg-surface-elevated",
+              "w-full rounded-lg px-3 py-2.5 text-left transition-all border",
+              active ? "bg-surface-elevated border-border shadow-sm" : "border-transparent hover:bg-surface-elevated",
             ].join(" ")}
           >
             <div className="flex items-start justify-between gap-3">

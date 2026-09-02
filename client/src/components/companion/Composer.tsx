@@ -31,7 +31,7 @@ export default function Composer({ onSend, disabled = false }: ComposerProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-border bg-surface p-3"
+      className="rounded-2xl border border-border bg-surface-elevated p-4 transition-all focus-within:border-foreground-muted focus-within:ring-1 focus-within:ring-foreground-muted shadow-sm"
     >
       <textarea
         value={message}
