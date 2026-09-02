@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-
+import { createNotification } from "../../notifications/services/notification.service";
 import { Task } from "../models/Task";
 
 import type {
@@ -58,6 +58,15 @@ export async function updateTask(
   taskId: string,
   data: UpdateTaskInput,
 ) {
+  const existingTask = await Task.findOne({
+    _id: taskId,
+    user: new Types.ObjectId(userId),
+  });
+
+  if (!existingTask) {
+    return null;
+  }
+
   const updateData = {
     ...data,
   };
@@ -74,7 +83,7 @@ export async function updateTask(
     });
   }
 
-  return Task.findOneAndUpdate(
+  const updatedTask = await Task.findOneAndUpdate(
     {
       _id: taskId,
       user: new Types.ObjectId(userId),
@@ -85,6 +94,27 @@ export async function updateTask(
       runValidators: true,
     },
   ).populate("goal", "title");
+
+  if (
+    updatedTask &&
+    data.status === "completed" &&
+    existingTask.status !== "completed"
+  ) {
+    try {
+      await createNotification(userId, {
+        type: "task",
+        title: "Task completed",
+        description: `You completed "${existingTask.title}".`,
+        metadata: {
+          taskId: existingTask._id.toString(),
+        },
+      });
+    } catch (error) {
+      console.error("Create task completion notification error:", error);
+    }
+  }
+
+  return updatedTask;
 }
 
 export async function deleteTask(userId: string, taskId: string) {

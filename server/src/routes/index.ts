@@ -7,7 +7,7 @@ import checkInRoutes from "../modules/checkins/routes/checkin.routes.js";
 import timelineRoutes from "../modules/timeline/routes/timeline.routes.js";
 import memoryRoutes from "../modules/memory/routes/memory.routes.js";
 import settingsRoutes from "../modules/settings/routes/settings.routes.js";
-
+import notificationRoutes from "../modules/notifications/routes/notification.routes.js";
 const router = Router();
 
 router.get("/health", (_req, res) => {
@@ -25,5 +25,6 @@ router.use("/check-ins", checkInRoutes);
 router.use("/timeline", timelineRoutes);
 router.use("/memory", memoryRoutes);
 router.use("/settings", settingsRoutes);
+router.use("/notifications", notificationRoutes);
 
 export default router;

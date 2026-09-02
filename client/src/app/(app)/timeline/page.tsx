@@ -165,7 +165,7 @@ export default function TimelinePage() {
                       time={formatTime(item.createdAt)}
                       title={item.title}
                       description={item.description}
-                       type={item.type === "companion" ? "task" : item.type}
+                      type={item.type as "task" | "goal" | "checkin" | "companion"}
                     />
                   ))}
                 </Card>

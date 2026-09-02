@@ -1,4 +1,5 @@
 import "dotenv/config";
+import type { StringValue } from "ms";
 
 const requiredEnv = (key: string): string => {
   const value = process.env[key];
@@ -18,6 +19,6 @@ export const env = {
 
   JWT_ACCESS_SECRET: requiredEnv("JWT_ACCESS_SECRET"),
   JWT_REFRESH_SECRET: requiredEnv("JWT_REFRESH_SECRET"),
-  JWT_ACCESS_EXPIRES_IN: requiredEnv("JWT_ACCESS_EXPIRES_IN"),
-  JWT_REFRESH_EXPIRES_IN: requiredEnv("JWT_REFRESH_EXPIRES_IN"),
+  JWT_ACCESS_EXPIRES_IN: requiredEnv("JWT_ACCESS_EXPIRES_IN") as StringValue,
+  JWT_REFRESH_EXPIRES_IN: requiredEnv("JWT_REFRESH_EXPIRES_IN") as StringValue,
 };

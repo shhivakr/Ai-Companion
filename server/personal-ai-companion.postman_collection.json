@@ -50,6 +50,11 @@
       "key": "memoryId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -2871,6 +2876,424 @@
                 "exec": [
                   "pm.test(\"Status code is 400\", function () {",
                   "    pm.expect(pm.response.code).to.eql(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications",
+            "description": "Fetch all notifications for the authenticated user, sorted in reverse chronological order."
+          },
+          "response": [
+            {
+              "name": "Get Notifications - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/notifications"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"notifications\": [\n    {\n      \"_id\": \"65f1a2b3c4d5e6f7a8b9c0d1\",\n      \"user\": \"65f1a2b3c4d5e6f7a8b9c0d0\",\n      \"type\": \"task\",\n      \"title\": \"Task completed\",\n      \"description\": \"You completed your task.\",\n      \"read\": false,\n      \"metadata\": {},\n      \"createdAt\": \"2026-09-02T10:00:00.000Z\",\n      \"updatedAt\": \"2026-09-02T10:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains notifications array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.notifications).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Save notificationId if notifications exist\", function () {",
+                  "    const json = pm.response.json();",
+                  "    if (json.notifications && json.notifications.length > 0) {",
+                  "        const id = json.notifications[0]._id || json.notifications[0].id;",
+                  "        if (id) {",
+                  "            pm.collectionVariables.set('notificationId', id);",
+                  "        }",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Unread Notification Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications/unread-count",
+            "description": "Fetch the total count of unread notifications for the authenticated user."
+          },
+          "response": [
+            {
+              "name": "Get Unread Notification Count - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/notifications/unread-count"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"count\": 2\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains unread count\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('count');",
+                  "    pm.expect(json.count).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications/{{notificationId}}/read",
+            "description": "Mark a specific notification as read by replacing {{notificationId}} with a valid notification ID."
+          },
+          "response": [
+            {
+              "name": "Mark Notification as Read - Success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/notifications/{{notificationId}}/read"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Notification marked as read\",\n  \"notification\": {\n    \"_id\": \"65f1a2b3c4d5e6f7a8b9c0d1\",\n    \"user\": \"65f1a2b3c4d5e6f7a8b9c0d0\",\n    \"type\": \"task\",\n    \"title\": \"Task completed\",\n    \"description\": \"You completed your task.\",\n    \"read\": true,\n    \"metadata\": {},\n    \"createdAt\": \"2026-09-02T10:00:00.000Z\",\n    \"updatedAt\": \"2026-09-02T10:05:00.000Z\"\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains message and updated notification\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Notification marked as read');",
+                  "    pm.expect(json.notification).to.be.an('object');",
+                  "    pm.expect(json.notification.read).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications/read-all",
+            "description": "Mark all unread notifications as read for the authenticated user."
+          },
+          "response": [
+            {
+              "name": "Mark All Notifications as Read - Success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/notifications/read-all"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"All notifications marked as read\",\n  \"modifiedCount\": 2\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms all notifications marked as read\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('All notifications marked as read');",
+                  "    pm.expect(json).to.have.property('modifiedCount');",
+                  "    pm.expect(json.modifiedCount).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notifications Errors",
+      "item": [
+        {
+          "name": "Missing Access Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/notifications"
+          },
+          "response": [
+            {
+              "name": "Missing Access Token - 401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/notifications"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates failure\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid Notification ID",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications/invalid-notification-id/read"
+          },
+          "response": [
+            {
+              "name": "Invalid Notification ID - 400 Bad Request",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/notifications/invalid-notification-id/read"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Invalid notification ID\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates invalid ID\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Invalid notification ID');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Non-existent Notification",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications/64c13ab08edf48a008793caf/read"
+          },
+          "response": [
+            {
+              "name": "Non-existent Notification - 404 Not Found",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": "{{baseUrl}}/notifications/64c13ab08edf48a008793caf/read"
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Notification not found\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates not found\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql('Notification not found');",
                   "});"
                 ]
               }

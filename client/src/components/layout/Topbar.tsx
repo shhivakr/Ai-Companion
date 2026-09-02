@@ -5,9 +5,11 @@ import { useState } from "react";
 
 import MobileNav from "./MobileNav";
 import ThemeToggle from "../ui/ThemeToggle";
+import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 
 export default function Topbar() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const { data: unreadCount = 0 } = useUnreadNotificationCount();
 
   return (
     <>
@@ -35,7 +37,6 @@ export default function Topbar() {
           </button>
 
           {/* Search */}
-
           <button
             type="button"
             className="hidden h-9 w-full max-w-md items-center justify-between rounded-lg border border-border bg-surface-elevated px-3 text-sm text-foreground-secondary transition hover:border-foreground-muted sm:flex"
@@ -53,21 +54,19 @@ export default function Topbar() {
                 <circle cx="11" cy="11" r="6.5" />
                 <path d="m16 16 4 4" />
               </svg>
-
               <span>Search or ask SIVRA...</span>
             </span>
-
             <span className="rounded border border-border px-1.5 py-0.5 text-[10px] text-foreground-muted">
               Ctrl K
             </span>
           </button>
         </div>
+
         {/* Right */}
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
 
           {/* Notifications */}
-
           <Link
             href="/notifications"
             className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary transition hover:bg-surface-elevated hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground-muted focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -87,11 +86,12 @@ export default function Topbar() {
               <path d="M10 21h4" />
             </svg>
             {/* Unread indicator */}
-            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-foreground" />
+            {unreadCount > 0 && (
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-foreground" />
+            )}
           </Link>
 
           {/* Profile */}
-
           <Link
             href="/settings"
             className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-xs font-medium text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground-muted focus-visible:ring-offset-2 focus-visible:ring-offset-background"
