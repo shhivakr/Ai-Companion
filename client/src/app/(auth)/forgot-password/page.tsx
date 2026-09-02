@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
       footer={
         <Link
           href="/login"
-          className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-950"
+          className="text-sm font-medium text-foreground-secondary transition-colors hover:text-foreground"
         >
           Back to sign in
         </Link>
@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
         <div>
           <label
             htmlFor="email"
-            className="text-sm font-medium text-neutral-900"
+            className="text-sm font-medium text-foreground"
           >
             Email address
           </label>
@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
-            className="mt-2 h-11 w-full rounded-xl border border-neutral-200 bg-white px-3.5 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100"
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-surface-elevated px-3.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted hover:border-foreground-muted focus:border-foreground-muted focus:ring-1 focus:ring-foreground-muted"
           />
         </div>
 

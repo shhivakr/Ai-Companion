@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 interface AuthShellProps {
   title: string;
@@ -14,7 +14,7 @@ export default function AuthShell({
   footer,
 }: AuthShellProps) {
   return (
-    <main className="min-h-screen bg-neutral-50 px-5 py-8 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-100">
+    <main className="min-h-screen bg-background px-5 py-8 text-foreground">
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[420px] flex-col justify-center">
         {/* Brand */}
 
@@ -29,11 +29,11 @@ export default function AuthShell({
             </div>
 
             <div>
-              <p className="text-[15px] font-semibold text-neutral-950 dark:text-neutral-50">
+              <p className="text-[15px] font-semibold text-foreground">
                 SIVRA
               </p>
 
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="text-xs text-foreground-secondary">
                 Your personal AI companion
               </p>
             </div>
@@ -43,18 +43,18 @@ export default function AuthShell({
         {/* Heading */}
 
         <div className="mb-6">
-          <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.025em] text-neutral-950 dark:text-neutral-50">
+          <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.025em] text-foreground">
             {title}
           </h1>
 
-          <p className="mt-2 text-[14px] leading-6 text-neutral-500 dark:text-neutral-400">
+          <p className="mt-2 text-[14px] leading-6 text-foreground-secondary">
             {description}
           </p>
         </div>
 
         {/* Form */}
 
-        <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-950 shadow-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 sm:p-7">
+        <div className="rounded-2xl border border-border bg-surface p-6 text-foreground shadow-none sm:p-7">
           {children}
         </div>
 
@@ -62,8 +62,16 @@ export default function AuthShell({
 
         {footer && <div className="mt-6 text-center">{footer}</div>}
 
-        <p className="mt-8 text-center text-[11px] text-neutral-400 dark:text-neutral-500">
-          Private by design. Built around your context.
+        <p className="mt-8 text-center text-[11px] text-foreground-muted">
+          Designed and built by {" "}
+          <a
+            href="https://github.com/shhivakr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-500"
+          >
+            Shiva Kumar
+          </a>
         </p>
       </div>
     </main>

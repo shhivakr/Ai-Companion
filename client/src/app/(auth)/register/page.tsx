@@ -61,11 +61,11 @@ export default function RegisterPage() {
       title="Create your account"
       description="Start building a better way to plan, reflect and move forward."
       footer={
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-foreground-secondary">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-medium text-neutral-950 hover:underline"
+            className="font-medium text-foreground hover:underline"
           >
             Sign in
           </Link>
@@ -76,20 +76,20 @@ export default function RegisterPage() {
         <GoogleButton onClick={handleGoogleRegister} />
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-neutral-100" />
+          <div className="h-px flex-1 bg-border" />
 
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-foreground-muted">
             or continue with email
           </span>
 
-          <div className="h-px flex-1 bg-neutral-100" />
+          <div className="h-px flex-1 bg-border" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="name"
-              className="text-sm font-medium text-neutral-900"
+              className="text-sm font-medium text-foreground"
             >
               Name
             </label>
@@ -103,14 +103,14 @@ export default function RegisterPage() {
               onChange={(event) => setName(event.target.value)}
               placeholder="Your name"
               disabled={loading}
-              className="mt-2 h-11 w-full rounded-xl border border-neutral-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-50"
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface-elevated px-3.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted hover:border-foreground-muted focus:border-foreground-muted focus:ring-1 focus:ring-foreground-muted disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
           <div>
             <label
               htmlFor="email"
-              className="text-sm font-medium text-neutral-900"
+              className="text-sm font-medium text-foreground"
             >
               Email address
             </label>
@@ -124,14 +124,14 @@ export default function RegisterPage() {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"
               disabled={loading}
-              className="mt-2 h-11 w-full rounded-xl border border-neutral-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-50"
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface-elevated px-3.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted hover:border-foreground-muted focus:border-foreground-muted focus:ring-1 focus:ring-foreground-muted disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="text-sm font-medium text-neutral-900"
+              className="text-sm font-medium text-foreground"
             >
               Password
             </label>
@@ -145,10 +145,10 @@ export default function RegisterPage() {
               onChange={(event) => setPassword(event.target.value)}
               placeholder="At least 8 characters"
               disabled={loading}
-              className="mt-2 h-11 w-full rounded-xl border border-neutral-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-50"
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface-elevated px-3.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted hover:border-foreground-muted focus:border-foreground-muted focus:ring-1 focus:ring-foreground-muted disabled:cursor-not-allowed disabled:opacity-60"
             />
 
-            <p className="mt-2 text-xs text-neutral-400">
+            <p className="mt-2 text-xs text-foreground-muted">
               Use at least 8 characters.
             </p>
           </div>

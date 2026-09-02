@@ -57,11 +57,11 @@ export default function LoginPage() {
       title="Welcome back"
       description="Sign in to continue with your SIVRA."
       footer={
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-foreground-secondary">
           Don't have an account?{" "}
           <Link
             href="/register"
-            className="font-medium text-neutral-950 hover:underline"
+            className="font-medium text-foreground hover:underline"
           >
             Create one
           </Link>
@@ -72,20 +72,20 @@ export default function LoginPage() {
         <GoogleButton onClick={handleGoogleLogin} />
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-neutral-100" />
+          <div className="h-px flex-1 bg-border" />
 
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-foreground-muted">
             or continue with email
           </span>
 
-          <div className="h-px flex-1 bg-neutral-100" />
+          <div className="h-px flex-1 bg-border" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="email"
-              className="text-sm font-medium text-neutral-900"
+              className="text-sm font-medium text-foreground"
             >
               Email address
             </label>
@@ -99,7 +99,7 @@ export default function LoginPage() {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"
               disabled={loading}
-              className="mt-2 h-11 w-full rounded-xl border border-neutral-200 bg-white px-3.5 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-50"
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface-elevated px-3.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted hover:border-foreground-muted focus:border-foreground-muted focus:ring-1 focus:ring-foreground-muted disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
@@ -107,14 +107,14 @@ export default function LoginPage() {
             <div className="flex items-center justify-between">
               <label
                 htmlFor="password"
-                className="text-sm font-medium text-neutral-900"
+                className="text-sm font-medium text-foreground"
               >
                 Password
               </label>
 
               <Link
                 href="/forgot-password"
-                className="text-xs font-medium text-neutral-500 hover:text-neutral-950"
+                className="text-xs font-medium text-foreground-secondary hover:text-foreground"
               >
                 Forgot password?
               </Link>
@@ -129,7 +129,7 @@ export default function LoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Enter your password"
               disabled={loading}
-              className="mt-2 h-11 w-full rounded-xl border border-neutral-200 bg-white px-3.5 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-50"
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface-elevated px-3.5 text-sm text-foreground outline-none transition placeholder:text-foreground-muted hover:border-foreground-muted focus:border-foreground-muted focus:ring-1 focus:ring-foreground-muted disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
 
