@@ -73,3 +73,23 @@ body {
 .chat-scrollbar::-webkit-scrollbar-button {
   display: none;
 }
+
+/* Loading Dots Animation */
+@keyframes loading-jump {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-loading-jump {
+  animation: loading-jump 0.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-loading-jump {
+    animation: none;
+  }
+}

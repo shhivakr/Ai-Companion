@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { useAuth } from "@/providers/AuthProvider";
+import LoadingDots from "../ui/LoadingDots";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -19,14 +20,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-neutral-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-950">
-            <span className="text-sm font-semibold text-white">S</span>
-          </div>
-
-          <p className="text-sm text-neutral-500">Loading SIVRA...</p>
-        </div>
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <LoadingDots />
       </main>
     );
   }
