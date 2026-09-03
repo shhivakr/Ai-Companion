@@ -4,6 +4,7 @@ import type { AuthenticatedRequest } from "../../../middleware/auth.middleware.j
 
 import {
   chatWithCompanion,
+  streamChatWithCompanion,
   getConversationHistory,
   getConversations,
 } from "../services/companion.service";
@@ -20,6 +21,7 @@ function getUserId(req: Request): string {
   return userId;
 }
 
+/** Existing non-streaming JSON endpoint — unchanged. */
 export async function chatCompanionController(req: Request, res: Response) {
   const result = chatSchema.safeParse(req.body);
 
@@ -48,6 +50,93 @@ export async function chatCompanionController(req: Request, res: Response) {
     return res.status(500).json({
       message: "Failed to generate companion response",
     });
+  }
+}
+
+/** New SSE streaming endpoint. */
+export async function streamChatCompanionController(
+  req: Request,
+  res: Response,
+) {
+  // ─── Validate input before starting SSE ───────────────────────────────────
+  const result = chatSchema.safeParse(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({
+      message: "Invalid companion request",
+      errors: result.error.flatten(),
+    });
+  }
+
+  const clientMessageId = req.body.clientMessageId;
+
+  if (
+    !clientMessageId ||
+    typeof clientMessageId !== "string" ||
+    clientMessageId.trim().length === 0
+  ) {
+    return res.status(400).json({
+      message: "clientMessageId is required for streaming",
+    });
+  }
+
+  let userId: string;
+
+  try {
+    userId = getUserId(req);
+  } catch {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // ─── Set SSE headers ───────────────────────────────────────────────────────
+  // Once we write these, HTTP status can no longer be changed.
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  // Disable Nginx/proxy buffering so chunks reach the client immediately
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders();
+
+  // ─── AbortController for client disconnect ─────────────────────────────────
+  const abortController = new AbortController();
+
+  function onClientClose() {
+    abortController.abort();
+  }
+
+  req.socket.on("close", onClientClose);
+
+  // ─── SSE write helper ──────────────────────────────────────────────────────
+  function writeEvent(data: object): void {
+    // Only write if response is still writable (client not disconnected)
+    if (!res.writableEnded && !abortController.signal.aborted) {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+      // Express 5 / Node HTTP does not expose flush directly; cast to any
+      // to call it when available (important for intermediate proxies).
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (res as any).flush?.();
+    }
+  }
+
+  // ─── Stream ────────────────────────────────────────────────────────────────
+  try {
+    await streamChatWithCompanion(
+      userId,
+      result.data.message,
+      clientMessageId.trim(),
+      writeEvent,
+      result.data.conversationId,
+      abortController.signal,
+    );
+  } catch (error) {
+    console.error("Companion stream controller error:", error);
+    // Attempt to inform client if connection is still open
+    writeEvent({ type: "error", code: "generation_failed" });
+  } finally {
+    req.socket.off("close", onClientClose);
+    if (!res.writableEnded) {
+      res.end();
+    }
   }
 }
 
