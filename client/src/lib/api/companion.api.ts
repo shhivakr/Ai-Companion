@@ -149,6 +149,8 @@ export async function streamCompanionChat(
 
   let response: Response;
 
+  console.log(`[companion] stream:start ${clientMessageId}`);
+
   try {
     response = await fetch("/api/companion/chat/stream", {
       method: "POST",
@@ -160,9 +162,10 @@ export async function streamCompanionChat(
     });
   } catch (err) {
     if ((err as Error).name === "AbortError") {
-      // User-initiated stop — not an error
+      console.log(`[companion] stream:abort ${clientMessageId}`);
       return;
     }
+    console.error(`[companion] sse:error ${clientMessageId}`, err);
     callbacks.onError("network_error");
     return;
   }
@@ -181,6 +184,7 @@ export async function streamCompanionChat(
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let receivedDoneEvent = false;
 
   try {
     while (true) {
@@ -207,7 +211,7 @@ export async function streamCompanionChat(
         try {
           event = JSON.parse(jsonStr) as StreamEvent;
         } catch {
-          // Malformed event — skip
+          console.warn(`[companion] parse:error ${clientMessageId}`);
           continue;
         }
 
@@ -219,9 +223,13 @@ export async function streamCompanionChat(
             callbacks.onChunk(event.text);
             break;
           case "done":
+            console.log(`[companion] frontend:sse:done ${clientMessageId}`);
+            receivedDoneEvent = true;
             callbacks.onDone();
             break;
           case "error":
+            console.log(`[companion] frontend:sse:error ${clientMessageId} - ${event.code}`);
+            receivedDoneEvent = true;
             callbacks.onError(event.code);
             break;
           case "tool_confirmation_required":
@@ -239,11 +247,17 @@ export async function streamCompanionChat(
         }
       }
     }
+    
+    if (!receivedDoneEvent) {
+      console.warn(`[companion] frontend:sse:premature_close ${clientMessageId}`);
+      callbacks.onError("network_error");
+    }
   } catch (err) {
     if ((err as Error).name === "AbortError") {
-      // User-initiated stop — not an error
+      console.log(`[companion] stream:abort ${clientMessageId}`);
       return;
     }
+    console.error(`[companion] sse:error ${clientMessageId}`, err);
     callbacks.onError("network_error");
   } finally {
     reader.releaseLock();
@@ -293,6 +307,7 @@ export async function confirmCompanionToolAction(
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let receivedDoneEvent = false;
 
   try {
     while (true) {
@@ -323,9 +338,11 @@ export async function confirmCompanionToolAction(
             callbacks.onChunk(event.text);
             break;
           case "done":
+            receivedDoneEvent = true;
             callbacks.onDone();
             break;
           case "error":
+            receivedDoneEvent = true;
             callbacks.onError(event.code);
             break;
           case "tool_confirmation_required":
@@ -342,6 +359,10 @@ export async function confirmCompanionToolAction(
             break;
         }
       }
+    }
+
+    if (!receivedDoneEvent) {
+      callbacks.onError("network_error");
     }
   } catch (err) {
     if ((err as Error).name === "AbortError") return;

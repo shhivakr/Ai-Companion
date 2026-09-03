@@ -83,7 +83,6 @@ export default function CompanionPage() {
 
   /* =================================== Derived =================================== */
   const isSending = sendState.status === "starting" || sendState.status === "streaming";
-  const isIdle = sendState.status === "idle";
   const hasFailed = sendState.status === "failed";
 
   /* =================================== Scroll =================================== */
@@ -272,25 +271,32 @@ export default function CompanionPage() {
           },
 
           onError: (code) => {
+            let errorMessage = "Couldn't generate a response.";
+            if (code === "rate_limited") {
+              errorMessage = "AI usage limit reached. Please try again shortly.";
+            } else if (code === "service_unavailable") {
+              errorMessage = "The AI service is temporarily unavailable. Please try again.";
+            } else if (code === "network_error") {
+              errorMessage = "Network connection lost. Please try again.";
+            }
+
             const hasPartialContent = (() => {
-              // Check what the placeholder has at the moment of error
               let hasContent = false;
               setMessages((prev) => {
                 const placeholder = prev.find(
                   (m) => m.id === STREAMING_PLACEHOLDER_ID,
                 );
-                hasContent = !!placeholder && placeholder.content.length > 0;
-
-                if (hasContent) {
-                  // Keep partial content with interrupted state
+                if (placeholder && placeholder.content.length > 0) {
+                  hasContent = true;
+                  // Has partial text — mark it interrupted and append reason
                   return prev.map((m) =>
                     m.id === STREAMING_PLACEHOLDER_ID
                       ? {
                           ...m,
                           id: `assistant-interrupted-${Date.now()}`,
+                          content: m.content + `\n\n*(Error: ${errorMessage})*`,
                           isStreaming: false,
                           isInterrupted: true,
-                          isError: false,
                         }
                       : m,
                   );
@@ -303,12 +309,10 @@ export default function CompanionPage() {
             })();
 
             if (!hasPartialContent) {
-              setSendState({ status: "failed", message });
+              setSendState({ status: "failed", message: errorMessage });
             } else {
-              setSendState({ status: "stopped" });
+              setSendState({ status: "idle" });
             }
-
-            void code; // consumed by state, not shown to user
           },
         },
         conversationId,
@@ -393,19 +397,29 @@ export default function CompanionPage() {
         scrollToBottomIfNear();
       },
       onError: (code) => {
+        let errorMessage = "Failed to complete action";
+        if (code === "rate_limited") {
+          errorMessage = "AI usage limit reached. Please try again shortly.";
+        } else if (code === "service_unavailable") {
+          errorMessage = "The AI service is temporarily unavailable. Please try again.";
+        } else if (code === "network_error") {
+          errorMessage = "Network connection lost. Please try again.";
+        }
+
         setMessages((prev) =>
           prev.map((m) =>
             m.id === messageId
               ? {
                   ...m,
                   id: `assistant-error-${Date.now()}`,
+                  content: m.content + `\n\n*(Error: ${errorMessage})*`,
                   isStreaming: false,
                   isError: true,
                 }
               : m,
           ),
         );
-        setSendState({ status: "failed", message: "Failed to complete action" });
+        setSendState({ status: "failed", message: errorMessage });
       },
       onToolConfirmationRequired: () => {},
       onToolAmbiguity: () => {},
@@ -549,13 +563,13 @@ export default function CompanionPage() {
             )}
 
             {/* ── Hard failure (no content arrived) ── */}
-            {hasFailed && isIdle && (
+            {hasFailed && (
               <MessageBubble
                 role="companion"
                 isError
                 onRetry={handleRetry}
               >
-                {"Couldn't generate a response."}
+                {sendState.status === "failed" ? sendState.message || "Couldn't generate a response." : "Couldn't generate a response."}
               </MessageBubble>
             )}
 

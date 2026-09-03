@@ -119,6 +119,7 @@ export async function streamChatCompanionController(
   }
 
   // ─── Stream ────────────────────────────────────────────────────────────────
+  console.log(`[companion] backend:request ${clientMessageId}`);
   try {
     await streamChatWithCompanion(
       userId,
@@ -129,12 +130,12 @@ export async function streamChatCompanionController(
       abortController.signal,
     );
   } catch (error) {
-    console.error("Companion stream controller error:", error);
-    // Attempt to inform client if connection is still open
+    console.error(`[companion] backend:error ${clientMessageId}`, error);
     writeEvent({ type: "error", code: "generation_failed" });
   } finally {
     req.socket.off("close", onClientClose);
     if (!res.writableEnded) {
+      console.log(`[companion] backend:sse:done ${clientMessageId}`);
       res.end();
     }
   }

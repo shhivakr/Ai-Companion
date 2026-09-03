@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { Conversation } from "../models/Conversation";
 import { Message } from "../models/Message";
 
-import { aiProvider } from "./ai.service";
+import { aiProvider, classifyGeminiError } from "./ai.service";
 import { getCompanionContext } from "./context.service";
 
 import { buildCompanionSystemPrompt } from "../prompts/companion.prompt";
@@ -203,6 +203,7 @@ export async function streamChatWithCompanion(
     const { companionToolDeclarations } = await import("../tools/tool.registry.js");
     const { processToolCall } = await import("../tools/execution/tool.executor.js");
 
+    console.log(`[companion] gemini:start ${clientMessageId}`);
     const textStream = await aiProvider.streamResponse(
       { systemInstruction, messages, tools: [{ functionDeclarations: companionToolDeclarations }] },
       abortSignal,
@@ -210,7 +211,10 @@ export async function streamChatWithCompanion(
 
     for await (const chunk of textStream) {
       if (abortSignal?.aborted) break;
-      streamStarted = true;
+      if (!streamStarted) {
+        streamStarted = true;
+        console.log(`[companion] gemini:chunk ${clientMessageId} (first chunk received)`);
+      }
 
       if (chunk.type === "toolCall") {
         const { toolCall } = chunk;
@@ -219,7 +223,6 @@ export async function streamChatWithCompanion(
         if (processResult.type === "ambiguity") {
           onEvent({ type: "tool_ambiguity" as any, message: processResult.message, candidates: processResult.candidates } as any);
           accumulated += processResult.message;
-          // We can stop here, since ambiguity requires user response
         } else if (processResult.type === "confirmation_required") {
           requiresConfirmation = true;
           toolCallResult = processResult;
@@ -232,7 +235,6 @@ export async function streamChatWithCompanion(
         } else if (processResult.type === "error") {
           onEvent({ type: "error", code: "generation_failed" });
         }
-        // If it's executed directly, we'd loop back to Gemini, but we're only doing confirmation_required tools.
         break; 
       } else {
         accumulated += chunk.text;
@@ -241,27 +243,23 @@ export async function streamChatWithCompanion(
     }
   } catch (err) {
     if (abortSignal?.aborted) return;
-    onEvent({ type: "error", code: "generation_failed" });
+    const errorCode = classifyGeminiError(err);
+    console.error(`[companion] gemini:error ${clientMessageId} (${errorCode})`, err);
+    onEvent({ type: "error", code: errorCode });
     return;
   }
 
   if (abortSignal?.aborted) return;
 
   if (!streamStarted || (!accumulated && !requiresConfirmation && !toolCallResult)) {
+    console.warn(`[companion] gemini:error ${clientMessageId} (empty response)`);
     onEvent({ type: "error", code: "generation_failed" });
     return;
   }
 
   // Persist
   try {
-    if (requiresConfirmation) {
-      // Don't persist a final assistant message yet, because they need to confirm.
-      // Or we can persist the tool call if we want, but usually it's better to wait until completion.
-      // For now, we will NOT persist the assistant message until execution is confirmed.
-      // But wait! If we don't persist it, on refresh the user won't see the confirmation UI.
-      // The prompt says "Do NOT persist this [PendingAction] to MongoDB unless the existing architecture clearly requires persistence."
-      // Since it's not persisted to DB, if they refresh, the confirmation is gone. This is fine.
-    } else {
+    if (!requiresConfirmation) {
       await Message.create({
         conversation: conversation._id,
         user: userId,
@@ -275,11 +273,12 @@ export async function streamChatWithCompanion(
       );
     }
   } catch (persistErr) {
-    console.error("Companion stream persistence error:", persistErr);
+    console.error(`[companion] backend:error ${clientMessageId} (persistence failed)`, persistErr);
     onEvent({ type: "error", code: "persistence_failed" });
     return;
   }
 
+  console.log(`[companion] gemini:done ${clientMessageId}`);
   onEvent({ type: "done" });
 }
 

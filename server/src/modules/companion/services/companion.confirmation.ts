@@ -1,11 +1,11 @@
-import { getPendingAction, consumePendingAction } from "../../tools/execution/tool.executor.js";
-import { executeCompanionTool } from "../../tools/tool.registry.js";
-import { aiProvider } from "../ai.service.js";
-import { getCompanionContext } from "../context.service.js";
-import { buildCompanionSystemPrompt } from "../../prompts/companion.prompt.js";
-import { Conversation } from "../../models/Conversation.js";
-import { Message } from "../../models/Message.js";
-import type { StreamEvent } from "../../types/companion.types.js";
+import { getPendingAction, consumePendingAction } from "../tools/execution/tool.executor.js";
+import { executeCompanionTool } from "../tools/tool.registry.js";
+import { aiProvider, classifyGeminiError } from "./ai.service.js";
+import { getCompanionContext } from "./context.service.js";
+import { buildCompanionSystemPrompt } from "../prompts/companion.prompt.js";
+import { Conversation } from "../models/Conversation.js";
+import { Message } from "../models/Message.js";
+import type { StreamEvent } from "../types/companion.types.js";
 
 export async function streamConfirmToolAction(
   userId: string,
@@ -15,8 +15,7 @@ export async function streamConfirmToolAction(
 ): Promise<void> {
   const pendingAction = getPendingAction(actionId, userId);
   if (!pendingAction) {
-    onEvent({ type: "error", code: "action_expired" } as any);
-    onEvent({ type: "done" });
+    onEvent({ type: "error", code: "invalid_request" } as any);
     return;
   }
 
@@ -53,7 +52,7 @@ export async function streamConfirmToolAction(
   const systemInstruction = buildCompanionSystemPrompt(context);
   
   // Create Gemini messages matching history
-  const messages: any[] = history.map((item) => ({
+  const messages: any[] = history.map((item: any) => ({
     role: item.role,
     content: item.content,
   }));
@@ -90,7 +89,9 @@ export async function streamConfirmToolAction(
     }
   } catch (err) {
     if (abortSignal?.aborted) return;
-    onEvent({ type: "error", code: "generation_failed" } as any);
+    const errorCode = classifyGeminiError(err);
+    console.error(`[companion] gemini:error ${actionId} (${errorCode})`, err);
+    onEvent({ type: "error", code: errorCode } as any);
     return;
   }
 

@@ -133,4 +133,6 @@ export type StreamEvent =
 export type StreamErrorCode =
   | "generation_failed"
   | "persistence_failed"
-  | "invalid_request";
+  | "invalid_request"
+  | "rate_limited"
+  | "service_unavailable";

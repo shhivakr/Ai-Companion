@@ -1,6 +1,19 @@
 import { GoogleGenAI } from "@google/genai";
 
-import type { AIRequest, AIResponse, AIStreamChunk } from "../types/companion.types";
+import type { AIRequest, AIResponse, AIStreamChunk, StreamErrorCode } from "../types/companion.types";
+
+/**
+ * Classifies a Gemini SDK error into a typed StreamErrorCode.
+ * The @google/genai SDK throws `ApiError` with a numeric `.status` property.
+ */
+export function classifyGeminiError(err: unknown): StreamErrorCode {
+  if (err && typeof err === "object" && "status" in err) {
+    const status = (err as { status: number }).status;
+    if (status === 429) return "rate_limited";
+    if (status === 503) return "service_unavailable";
+  }
+  return "generation_failed";
+}
 
 const apiKey = process.env.GEMINI_API_KEY;
 
