@@ -46,17 +46,19 @@ export async function chatWithCompanion(
     content: message,
   });
 
-  const [context, history] = await Promise.all([
-    getCompanionContext(userId),
+  const [context, rawHistory] = await Promise.all([
+    getCompanionContext(userId, message),
 
     Message.find({
       conversation: conversation._id,
       user: userId,
     })
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .limit(20)
       .lean(),
   ]);
+
+  const history = rawHistory.reverse();
 
   const systemInstruction = buildCompanionSystemPrompt(context);
 
@@ -162,16 +164,18 @@ export async function streamChatWithCompanion(
   }
 
   // ─── 3. Load context and conversation history concurrently ────────────────
-  const [context, history] = await Promise.all([
-    getCompanionContext(userId),
+  const [context, rawHistory] = await Promise.all([
+    getCompanionContext(userId, message),
     Message.find({
       conversation: conversation._id,
       user: userId,
     })
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .limit(20)
       .lean(),
   ]);
+
+  const history = rawHistory.reverse();
 
   const systemInstruction = buildCompanionSystemPrompt(context);
   const messages = history.map((item) => ({
@@ -179,69 +183,103 @@ export async function streamChatWithCompanion(
     content: item.content,
   }));
 
-  // ─── 4. Stream from AI provider ───────────────────────────────────────────
+  const tools = [
+    // We only expose tools for explicitly tool-supported intents or all the time?
+    // Let's expose them all the time so Gemini can decide.
+    // However, we must import `companionToolDeclarations`.
+    // I'll add an import at the top of the file.
+  ];
+
+  // We actually need to import `companionToolDeclarations` from tool.registry.ts.
+  // We'll do that at the top of the file in a separate step.
+  // For now, let's just pass `tools: (await import("../tools/tool.registry.js")).companionToolDeclarations`
+  
   let accumulated = "";
   let streamStarted = false;
+  let requiresConfirmation = false;
+  let toolCallResult: any = null;
 
   try {
+    const { companionToolDeclarations } = await import("../tools/tool.registry.js");
+    const { processToolCall } = await import("../tools/execution/tool.executor.js");
+
     const textStream = await aiProvider.streamResponse(
-      { systemInstruction, messages },
+      { systemInstruction, messages, tools: [{ functionDeclarations: companionToolDeclarations }] },
       abortSignal,
     );
 
     for await (const chunk of textStream) {
-      // If client disconnected, stop consuming the generator.
-      if (abortSignal?.aborted) {
-        break;
-      }
-
+      if (abortSignal?.aborted) break;
       streamStarted = true;
-      accumulated += chunk;
-      onEvent({ type: "chunk", text: chunk });
+
+      if (chunk.type === "toolCall") {
+        const { toolCall } = chunk;
+        const processResult = await processToolCall(userId, toolCall.name, toolCall.args, resolvedConversationId, clientMessageId);
+        
+        if (processResult.type === "ambiguity") {
+          onEvent({ type: "tool_ambiguity" as any, message: processResult.message, candidates: processResult.candidates } as any);
+          accumulated += processResult.message;
+          // We can stop here, since ambiguity requires user response
+        } else if (processResult.type === "confirmation_required") {
+          requiresConfirmation = true;
+          toolCallResult = processResult;
+          onEvent({ 
+            type: "tool_confirmation_required" as any, 
+            actionId: processResult.action.id,
+            toolName: processResult.action.toolName,
+            summary: processResult.action.summary
+          } as any);
+        } else if (processResult.type === "error") {
+          onEvent({ type: "error", code: "generation_failed" });
+        }
+        // If it's executed directly, we'd loop back to Gemini, but we're only doing confirmation_required tools.
+        break; 
+      } else {
+        accumulated += chunk.text;
+        onEvent({ type: "chunk", text: chunk.text });
+      }
     }
   } catch (err) {
-    // Distinguish abort from genuine error
-    if (abortSignal?.aborted) {
-      // Client disconnected — do not persist partial response, do not emit error
-      return;
-    }
-
-    // Genuine AI generation failure
+    if (abortSignal?.aborted) return;
     onEvent({ type: "error", code: "generation_failed" });
     return;
   }
 
-  // If aborted after the loop (e.g. aborted between chunks), do not persist.
-  if (abortSignal?.aborted) {
-    return;
-  }
+  if (abortSignal?.aborted) return;
 
-  if (!streamStarted || !accumulated) {
+  if (!streamStarted || (!accumulated && !requiresConfirmation && !toolCallResult)) {
     onEvent({ type: "error", code: "generation_failed" });
     return;
   }
 
-  // ─── 5. Persist the complete assistant response (exactly once) ────────────
+  // Persist
   try {
-    await Message.create({
-      conversation: conversation._id,
-      user: userId,
-      role: "assistant",
-      content: accumulated,
-    });
+    if (requiresConfirmation) {
+      // Don't persist a final assistant message yet, because they need to confirm.
+      // Or we can persist the tool call if we want, but usually it's better to wait until completion.
+      // For now, we will NOT persist the assistant message until execution is confirmed.
+      // But wait! If we don't persist it, on refresh the user won't see the confirmation UI.
+      // The prompt says "Do NOT persist this [PendingAction] to MongoDB unless the existing architecture clearly requires persistence."
+      // Since it's not persisted to DB, if they refresh, the confirmation is gone. This is fine.
+    } else {
+      await Message.create({
+        conversation: conversation._id,
+        user: userId,
+        role: "assistant",
+        content: accumulated,
+      });
 
-    await Conversation.updateOne(
-      { _id: conversation._id, user: userId },
-      { $set: { updatedAt: new Date() } },
-    );
+      await Conversation.updateOne(
+        { _id: conversation._id, user: userId },
+        { $set: { updatedAt: new Date() } },
+      );
+    }
   } catch (persistErr) {
-    // Persistence failed — inform the client if the connection is still open
     console.error("Companion stream persistence error:", persistErr);
     onEvent({ type: "error", code: "persistence_failed" });
     return;
   }
 
-  // ─── 6. Signal successful completion ─────────────────────────────────────
   onEvent({ type: "done" });
 }
 

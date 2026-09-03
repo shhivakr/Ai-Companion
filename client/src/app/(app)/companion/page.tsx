@@ -36,6 +36,12 @@ interface LocalMessage extends CompanionMessage {
   isInterrupted?: boolean;
   /** True when generation failed with no content */
   isError?: boolean;
+  /** Pending tool action waiting for confirmation */
+  pendingAction?: {
+    actionId: string;
+    toolName: string;
+    summary: string;
+  };
 }
 
 const STREAMING_PLACEHOLDER_ID = "assistant-streaming-placeholder";
@@ -69,6 +75,7 @@ export default function CompanionPage() {
   const {
     startStream,
     stopStream,
+    confirmAction,
     isStreaming,
     conversations,
     isLoadingConversations,
@@ -234,6 +241,36 @@ export default function CompanionPage() {
             scrollToBottomIfNear();
           },
 
+          onToolConfirmationRequired: (actionId, toolName, summary) => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === STREAMING_PLACEHOLDER_ID
+                  ? { ...m, pendingAction: { actionId, toolName, summary } }
+                  : m,
+              ),
+            );
+            scrollToBottomIfNear();
+          },
+
+          onToolAmbiguity: (message, candidates) => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === STREAMING_PLACEHOLDER_ID
+                  ? { ...m, content: m.content + message, isStreaming: true }
+                  : m,
+              ),
+            );
+            scrollToBottomIfNear();
+          },
+
+          onToolExecuting: (toolName) => {
+            // Can update UI if needed, for now do nothing
+          },
+
+          onToolResult: (toolName, success) => {
+             // Can update UI if needed, for now do nothing
+          },
+
           onError: (code) => {
             const hasPartialContent = (() => {
               // Check what the placeholder has at the moment of error
@@ -316,6 +353,83 @@ export default function CompanionPage() {
     if (!message) return;
     handleSend(message, true);
   }, [isSending, handleSend]);
+
+  /* =================================== Tool Confirmation ======================= */
+  const handleConfirmAction = useCallback((actionId: string, messageId: string) => {
+    if (isSending) return;
+    
+    // Remove the pending action from the UI
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, pendingAction: undefined, isStreaming: true } : m));
+    
+    confirmAction(actionId, {
+      onConversationId: () => {},
+      onChunk: (text) => {
+        setSendState({ status: "streaming" });
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? { ...m, content: m.content + text, isStreaming: true }
+              : m,
+          ),
+        );
+        scrollToBottomIfNear();
+      },
+      onDone: () => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  id: `assistant-${Date.now()}`,
+                  isStreaming: false,
+                  isInterrupted: false,
+                  isError: false,
+                }
+              : m,
+          ),
+        );
+        setSendState({ status: "completed" });
+        setTimeout(() => setSendState({ status: "idle" }), 0);
+        scrollToBottomIfNear();
+      },
+      onError: (code) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  id: `assistant-error-${Date.now()}`,
+                  isStreaming: false,
+                  isError: true,
+                }
+              : m,
+          ),
+        );
+        setSendState({ status: "failed", message: "Failed to complete action" });
+      },
+      onToolConfirmationRequired: () => {},
+      onToolAmbiguity: () => {},
+      onToolExecuting: () => {},
+      onToolResult: () => {},
+    });
+  }, [isSending, confirmAction, scrollToBottomIfNear]);
+
+  const handleCancelAction = useCallback((actionId: string, messageId: string) => {
+    // Just remove it from UI and show a message that it was cancelled
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId
+          ? {
+              ...m,
+              pendingAction: undefined,
+              isStreaming: false,
+              content: m.content + "\n\n*Action cancelled by user.*"
+            }
+          : m,
+      ),
+    );
+    setSendState({ status: "idle" });
+  }, []);
 
   /* =================================== New conversation =================================== */
   function handleNewConversation() {
@@ -420,6 +534,9 @@ export default function CompanionPage() {
                   isStreaming={message.isStreaming}
                   isInterrupted={message.isInterrupted}
                   isError={message.isError}
+                  pendingAction={message.pendingAction}
+                  onConfirmAction={(actionId) => handleConfirmAction(actionId, message.id)}
+                  onCancelAction={(actionId) => handleCancelAction(actionId, message.id)}
                   onRetry={
                     (message.isInterrupted || message.isError)
                       ? handleRetry

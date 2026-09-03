@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   chatCompanionController,
   streamChatCompanionController,
+  streamConfirmToolActionController,
   getConversationController,
   getConversationsController,
 } from "../controllers/companion.controller.js";
@@ -16,6 +17,8 @@ router.post("/chat", requireAuth, chatCompanionController);
 
 // Streaming SSE endpoint
 router.post("/chat/stream", requireAuth, streamChatCompanionController);
+
+router.post("/tool-actions/:actionId/confirm", requireAuth, streamConfirmToolActionController);
 
 router.get("/conversations", requireAuth, getConversationsController);
 

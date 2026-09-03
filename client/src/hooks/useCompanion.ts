@@ -63,6 +63,47 @@ export function useCompanion() {
     [queryClient],
   );
 
+  const confirmAction = useCallback(
+    async (
+      actionId: string,
+      callbacks: StreamCallbacks,
+    ) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      setIsStreaming(true);
+
+      try {
+        await (await import("@/lib/api/companion.api")).confirmCompanionToolAction(
+          actionId,
+          {
+            ...callbacks,
+            onDone: () => {
+              callbacks.onDone();
+              queryClient.invalidateQueries({
+                queryKey: ["companion", "conversations"],
+              });
+              queryClient.invalidateQueries({
+                queryKey: ["tasks"], // Ensure tasks refresh since they might have changed
+              });
+              queryClient.invalidateQueries({
+                queryKey: ["checkins"],
+              });
+            },
+          },
+          controller.signal,
+        );
+      } finally {
+        abortControllerRef.current = null;
+        setIsStreaming(false);
+      }
+    },
+    [queryClient],
+  );
+
   // ─── Stop current stream ──────────────────────────────────────────────────
   const stopStream = useCallback(() => {
     if (abortControllerRef.current) {
@@ -79,6 +120,7 @@ export function useCompanion() {
   return {
     startStream,
     stopStream,
+    confirmAction,
     isStreaming,
 
     conversations: conversationsQuery.data?.conversations ?? [],

@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
-import type { AIRequest, AIResponse } from "../types/companion.types";
+import type { AIRequest, AIResponse, AIStreamChunk } from "../types/companion.types";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -17,71 +17,117 @@ export interface AIProvider {
   streamResponse(
     request: AIRequest,
     abortSignal?: AbortSignal,
-  ): Promise<AsyncGenerator<string>>;
+  ): Promise<AsyncGenerator<AIStreamChunk>>;
 }
 
 export class GeminiProvider implements AIProvider {
   async generateResponse(request: AIRequest): Promise<AIResponse> {
+    const config: any = {
+      systemInstruction: request.systemInstruction,
+    };
+    if (request.tools) {
+      config.tools = request.tools;
+    }
+
     const response = await client.models.generateContent({
       model: "gemini-3.6-flash",
-      contents: request.messages.map((message) => ({
-        role: message.role === "assistant" ? "model" : "user",
-        parts: [
-          {
-            text: message.content,
-          },
-        ],
-      })),
-      config: {
-        systemInstruction: request.systemInstruction,
-      },
+      contents: request.messages.map((message) => {
+        if ((message as any).role === "function") {
+          return {
+            role: "user",
+            parts: [{ functionResponse: { name: (message as any).name, response: (message as any).content } }]
+          };
+        }
+        if ((message as any).role === "tool_call") {
+          return {
+            role: "model",
+            parts: [{ functionCall: { name: (message as any).name, args: (message as any).args } }]
+          };
+        }
+        return {
+          role: message.role === "assistant" ? "model" : "user",
+          parts: [{ text: message.content }],
+        };
+      }),
+      config,
     });
 
-    const content = response.text?.trim();
+    const content = response.text?.trim() || "";
 
-    if (!content) {
-      throw new Error("AI provider returned an empty response");
+    let toolCall;
+    if (response.functionCalls && response.functionCalls.length > 0) {
+      const fc = response.functionCalls[0];
+      if (fc.name && fc.args) {
+        toolCall = {
+          name: fc.name,
+          args: fc.args
+        };
+      }
+    }
+
+    if (!content && !toolCall) {
+      throw new Error("AI provider returned an empty response without tool calls");
     }
 
     return {
       content,
+      toolCall
     };
   }
 
   async streamResponse(
     request: AIRequest,
     abortSignal?: AbortSignal,
-  ): Promise<AsyncGenerator<string>> {
+  ): Promise<AsyncGenerator<AIStreamChunk>> {
+    const config: any = {
+      systemInstruction: request.systemInstruction,
+      abortSignal,
+    };
+    if (request.tools) {
+      config.tools = request.tools;
+    }
+
     const generator = await client.models.generateContentStream({
       model: "gemini-3.6-flash",
-      contents: request.messages.map((message) => ({
-        role: message.role === "assistant" ? "model" : "user",
-        parts: [
-          {
-            text: message.content,
-          },
-        ],
-      })),
-      config: {
-        systemInstruction: request.systemInstruction,
-        // Pass abortSignal into the SDK. Note from the SDK docs:
-        // AbortSignal is a client-only operation — it stops the local
-        // fetch but does not cancel billing/usage on Google's side.
-        abortSignal,
-      },
+      contents: request.messages.map((message) => {
+        if ((message as any).role === "function") {
+          return {
+            role: "user",
+            parts: [{ functionResponse: { name: (message as any).name, response: (message as any).content } }]
+          };
+        }
+        if ((message as any).role === "tool_call") {
+          return {
+            role: "model",
+            parts: [{ functionCall: { name: (message as any).name, args: (message as any).args } }]
+          };
+        }
+        return {
+          role: message.role === "assistant" ? "model" : "user",
+          parts: [{ text: message.content }],
+        };
+      }),
+      config,
     });
 
-    // Wrap the generator to yield only text strings
-    async function* textStream(): AsyncGenerator<string> {
+    async function* mappedStream(): AsyncGenerator<AIStreamChunk> {
       for await (const chunk of generator) {
+        if (chunk.functionCalls && chunk.functionCalls.length > 0) {
+          const fc = chunk.functionCalls[0];
+          if (fc.name && fc.args) {
+            yield { type: "toolCall", toolCall: { name: fc.name, args: fc.args } };
+            return;
+          }
+        }
+        
         const text = chunk.text;
         if (text) {
-          yield text;
+          yield { type: "text", text };
         }
       }
     }
 
-    return textStream();
+    return mappedStream();
   }
 }
 

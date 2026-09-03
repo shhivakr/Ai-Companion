@@ -140,6 +140,63 @@ export async function streamChatCompanionController(
   }
 }
 
+export async function streamConfirmToolActionController(
+  req: Request<{ actionId: string }>,
+  res: Response,
+) {
+  const { actionId } = req.params;
+
+  let userId: string;
+
+  try {
+    userId = getUserId(req);
+  } catch {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // ─── Set SSE headers ───────────────────────────────────────────────────────
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders();
+
+  const abortController = new AbortController();
+
+  function onClientClose() {
+    abortController.abort();
+  }
+
+  req.socket.on("close", onClientClose);
+
+  function writeEvent(data: object): void {
+    if (!res.writableEnded && !abortController.signal.aborted) {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (res as any).flush?.();
+    }
+  }
+
+  try {
+    // Dynamic import to prevent circular dependency issues if any
+    const { streamConfirmToolAction } = await import("../services/companion.confirmation.js");
+    await streamConfirmToolAction(
+      userId,
+      actionId,
+      writeEvent,
+      abortController.signal,
+    );
+  } catch (error) {
+    console.error("Companion confirm stream controller error:", error);
+    writeEvent({ type: "error", code: "generation_failed" });
+  } finally {
+    req.socket.off("close", onClientClose);
+    if (!res.writableEnded) {
+      res.end();
+    }
+  }
+}
+
 export async function getConversationController(
   req: Request<{ conversationId: string }>,
   res: Response,

@@ -14,6 +14,13 @@ interface MessageBubbleProps {
   /** True when the stream was stopped mid-response (has partial text) */
   isInterrupted?: boolean;
   onRetry?: () => void;
+  pendingAction?: {
+    actionId: string;
+    toolName: string;
+    summary: string;
+  };
+  onConfirmAction?: (actionId: string) => void;
+  onCancelAction?: (actionId: string) => void;
 }
 
 export default function MessageBubble({
@@ -23,6 +30,9 @@ export default function MessageBubble({
   isError,
   isInterrupted,
   onRetry,
+  pendingAction,
+  onConfirmAction,
+  onCancelAction,
 }: MessageBubbleProps) {
   const isUser = role === "user";
 
@@ -59,7 +69,7 @@ export default function MessageBubble({
         </div>
 
         {/* Loading dots — shown only while streaming with no content yet */}
-        {isStreaming && !hasContent && (
+        {isStreaming && !hasContent && !pendingAction && (
           <LoadingDots />
         )}
 
@@ -122,6 +132,32 @@ export default function MessageBubble({
             ) : (
               children
             )}
+          </div>
+        )}
+
+        {/* Pending Action UI */}
+        {pendingAction && (
+          <div className="mt-3 p-4 rounded-xl border border-border bg-surface-elevated shadow-sm max-w-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-semibold text-foreground mb-1">Action Required</h4>
+                <p className="text-xs text-foreground-secondary mb-3">{pendingAction.summary}</p>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => onConfirmAction && onConfirmAction(pendingAction.actionId)}
+                    className="flex-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-colors hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-foreground-muted"
+                  >
+                    Confirm
+                  </button>
+                  <button 
+                    onClick={() => onCancelAction && onCancelAction(pendingAction.actionId)}
+                    className="flex-1 rounded-lg border border-border bg-transparent px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-foreground-muted"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
